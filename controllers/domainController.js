@@ -1,6 +1,6 @@
 const User = require('../models/model.user');
 const Content = require('../models/model.content');
-
+const Subdomain = require('../models/model.subdomain');
 const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcryptjs');
 const { json } = require('body-parser');
