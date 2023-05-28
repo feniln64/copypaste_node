@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 const contentSchema =new mongoose.Schema({
-    email:{
+    user:{
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'User'
@@ -10,11 +10,10 @@ const contentSchema =new mongoose.Schema({
     content:{
         type: String,  //add constraint to frontend also minimum 3 characters required
         required: true
-    },
-    time_stamp:{
-        type: Date,
-        default: Date.now
     }
+},
+{
+    timestamps: true
 })
 
 module.exports = mongoose.model('Content',contentSchema)

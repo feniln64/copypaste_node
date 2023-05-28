@@ -19,6 +19,8 @@ app.use(express.json());
 dbConnection()
 
 app.use('/users',require('./routes/userRoutes'))
+app.use('/auth',require('./routes/authRoutes'))
+app.use('/subdomains',require('./routes/subdomainRoute'))
 
 mongoose.connection.once('open',()=>{
     console.log("MongoDB connection established successfully");

@@ -1,128 +1,53 @@
-const User = require('../models/model.user');
 const Content = require('../models/model.content');
 const Subdomain = require('../models/model.subdomain');
 const asyncHandler = require('express-async-handler');
-const bcrypt = require('bcryptjs');
 const { json } = require('body-parser');
 
-// @desc    Get all users
-// @route   GET /users
+// @desc    Get all subdoamins
+// @route   GET /subdoamin
 // @access  Private
-const getAllUsers = asyncHandler(async (req, res) => {
-    const users = await User.find().select('-password').lean();
-    if(!users?.length){
-        return res.status(404).json({message: "No users found"});
+const getAllSubdomain = asyncHandler(async (req, res) => {
+    const subdomains = await Subdomain.find().lean();
+    if(!subdomains?.length){
+        return res.status(404).json({message: "No subdomains found"});
     }
-    res.json(users);
+    res.json(subdomains);
 })
 
 
-// @desc    create users
-// @route   POST /users
+// @desc    create subdomains
+// @route   POST /subdomains
 // @access  Private
-const createNewUser = asyncHandler(async (req, res) => {
-    const {email,name,password,roles}=req.body;
-
+const createNewSubdomain = asyncHandler(async (req, res) => {
+    const {userId,subdomain,active}=req.body;
+    console.log(userId,subdomain,typeof active);
     // check data
-    console.log(email,name,password);
-        if (!email || !name || !password || !Array.isArray(roles)) {
+    
+        if (!userId || !subdomain || typeof active !== "boolean" ) {
             return res.status(400).json({message: "Please enter all fields"});
         }
 
-    // check if user already exists
-        const duplicate = await User.findOne({email}).lean().exec();
+    // check if subdomain already exists
+        const duplicate = await Subdomain.findOne({subdomain}).lean().exec();
         if (duplicate) {
-            return res.status(409).json({message: "User already exists"});
+            return res.status(409).json({message: "Subdomain already exists"});
         }
-    
-    // hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
 
-        const userObject ={ email, name,"password": hashedPassword, roles };
+        const subdomainObject ={ userId, subdomain, active };
     
-    // create user
-        const user = await User.create(userObject);
-        if (!user) {
-            console.log(typeof user);
+    // create subdomain
+        const createSubdomain = await Subdomain.create(subdomainObject);
+        if (!createSubdomain) {
             res.status(500).json({message: "Something went wrong"});
         }else{
-            res.status(201).json({message: `${user} created successfully`});
-            // res.status(201).json({message: "User created successfully"});
+            res.status(201).json({message: `subdomain ${subdomain} created successfully`});
+            // res.status(201).json({message: "Subdomain created successfully"});
         }
 })
 
-// @desc    update user
-// @route   POST /users
-// @access  Private
-const updateUser = asyncHandler(async (req, res) => {
-    const {email,name,roles,active,premium_user,password}=req.body;
-    // console.log(email,name,roles,active,premium_user);
-    console.log(req.body.id);
-    if(!email || !name || !Array.isArray(roles) || typeof active !== "boolean" || typeof !premium_user !== "boolean"){
-        return res.status(400).json({message: "All fields are required.."});
-    }
 
-    const user = await User.findOne({email:email}).exec();
-    if(!user){
-        return res.status(404).json({message: "User not found"});
-    }
-
-    const duplicate = await User.findOne({email}).lean().exec();
-    console.log("duplicate is ="+duplicate.email);
-    if (duplicate && duplicate.email.toString() == email) {
-        return res.status(409).json({message: "This email is already exists with another account"});
-    }
-
-    user.email = email;
-    user.name = name;
-    user.roles = roles;
-    user.active = active;
-    user.premium_user = premium_user;
-
-    if(password){
-        const hashedPassword = await bcrypt.hash(password, 10);
-        user.password = hashedPassword;
-    }
-
-    const updateUser  = await user.save();
-    if(!updateUser){
-        res.status(500).json({message: "Something went wrong"});
-    }else{
-        res.status(200).json({message: `${name} updated successfully}`});
-    }
-   
-})
-
-// @desc    delete user
-// @route   POST /users
-// @access  Private
-const deleteUser = asyncHandler(async (req, res) => {
-    const {id}=req.body;
-    if(!id){
-        return res.status(400).json({message: "User ID is required"});
-    }
-
-     // check if user has content in the database
-    //if yes then ask for delete content and then delete user
-    //logic add remaining
-    const content = await Content.find({User: id}).lean().exec();
-
-    const user= await User.findById(id).exec();
-    if(!user){
-        return res.status(404).json({message: "User not found"});
-    }
-
-    const deleteUser = await user.deleteOne();
-    if(!deleteUser){
-        res.status(500).json({message: "Something went wrong"});
-    }else{
-        res.status(200).json({message: `${user.name} deleted successfully}`});
-    }
-})
 
 module.exports = {
-    getAllUsers,
-    createNewUser,
-    updateUser,
-    deleteUser
+    getAllSubdomain,
+    createNewSubdomain
 }

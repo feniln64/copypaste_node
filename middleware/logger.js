@@ -18,8 +18,8 @@ const logEvents=async(message,logFileName)=>{
         console.log(err)
     }
 }
-
-const logger =(res,req,next) => {
+    
+const logger =(req,res,next) => {
     logEvents(`${req.method}\t${req.url}`,'reqLog.log') 
     console.log(`${req.method} ${req.path}`)
     next()

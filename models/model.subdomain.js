@@ -1,19 +1,22 @@
 const mongoose = require('mongoose')
 
 const subDoaminSchema =new mongoose.Schema({
-    email:{
-        type: mangoose.Schema.Types.ObjectId,
+    userId:{
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'User'
     },
+    subdomain:{
+        type: String,
+        required: true
+    },
     active:{
         type: Boolean,
-        default: ture
-    },
-    time_stamp:{
-        type: Date,
-        default: Date.now
+        default: true
     }
+},
+{
+    timestamps: true
 })
 
 module.exports = mongoose.model('Subdomain',subDoaminSchema)
