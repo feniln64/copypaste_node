@@ -26,8 +26,7 @@ const login = asyncHandler(async (req,res) => {
     if (!isMatch) {
         return res.status(401).json({message:'Invalid credentials'})
     }
-// vinu bhai  : 99252 23225 from
-// batuk bhai
+ 
     const accessToken = jwt.sign(
         {
             "UserInfo":{

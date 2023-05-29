@@ -1,5 +1,4 @@
 const Content = require('../models/model.content');
-const Content = require('../models/model.content');
 const asyncHandler = require('express-async-handler');
 const { json } = require('body-parser');
 
@@ -19,11 +18,11 @@ const getAllContent = asyncHandler(async (req, res) => {
 // @route   POST /content
 // @access  Private
 const createNewContent = asyncHandler(async (req, res) => {
-    const {userId,content,active}=req.body;
-    console.log(userId,content,typeof active);
+    const {id,content,active}=req.body;
+    console.log(id,content,typeof active);
     // check data
     
-        if (!userId || !content || typeof active !== "boolean" ) {
+        if (!id || !content || typeof active !== "boolean" ) {
             return res.status(400).json({message: "Please enter all fields"});
         }
 
@@ -33,7 +32,7 @@ const createNewContent = asyncHandler(async (req, res) => {
             return res.status(409).json({message: "Content already exists"});
         }
 
-        const contentObject ={ userId, content, active };
+        const contentObject ={ id, content, active };
     
     // create content
         const createContent = await Content.create(contentObject);
@@ -45,6 +44,14 @@ const createNewContent = asyncHandler(async (req, res) => {
         }
 })
 
+const getUserContent = asyncHandler(async (req, res) => {
+    
+    const content = await Content.find().lean();
+    if(!content?.length){
+        return res.status(404).json({message: "No content found"});
+    }
+    res.json(content);
+})
 
 
 module.exports = {

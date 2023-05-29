@@ -2,11 +2,12 @@ const jwt = require('jsonwebtoken');
 
 
 const verifyJWT = (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    // console.log(authHeader);
+    
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+    // console.log("Got authorization"+authHeader);
     
     if(!authHeader?.startsWith('Bearer ')) {
-        return res.status(401).send('Unauthorized');
+        return res.status(401).send('Unauthorized! Need access token');
     }
 
     const token = authHeader.split(' ')[1];
@@ -16,12 +17,14 @@ const verifyJWT = (req, res, next) => {
         process.env.ACCESS_TOKEN_SECRET, 
         (err, decoded) => {
             if(err) {
-            return res.status(403).send('Forbidden');
+            return res.status(403).send('Forbidden! Access token expired');
             }
 
         // console.log(decoded);
         req.user = decoded.UserInfo.username;
-        req.email = decodec.UserInfo.email;
+        req.email = decoded.UserInfo.email;
+        req.roles = decoded.UserInfo.roles;
+        req.premium_user = decoded.UserInfo.premium_user;
         next();
     })
 }   

@@ -22,8 +22,8 @@ const getAllUsers = asyncHandler(async (req, res) => {
 // @route   POST /users
 // @access  Private
 const createNewUser = asyncHandler(async (req, res) => {
-    const {email,name,password,roles}=req.body;
-
+    const {email,name,password}=req.body;
+    const roles = ["admin"];
     // check data
         console.log(email,name,password);
         if (!email || !name || !password || !Array.isArray(roles)) {
@@ -44,9 +44,9 @@ const createNewUser = asyncHandler(async (req, res) => {
     // create user
         const user = await User.create(userObject);
         if (!user) {
-            console.log(typeof user);
             res.status(500).json({message: "Something went wrong"});
         }else{
+            console.log("Admin is created");
             res.status(201).json({message: `${user} created successfully`});
             // res.status(201).json({message: "User created successfully"});
         }
@@ -121,9 +121,63 @@ const deleteUser = asyncHandler(async (req, res) => {
     }
 })
 
+const getUser = asyncHandler(async (req, res) => {
+    const {email}=req.body;
+        console.log("Id is "+email);
+        if(!email){
+            return res.status(400).json({message: "User Email is required"});
+        }
+
+        const user= await User.findOne(email).exec();
+        if(!user){
+            return res.status(404).json({message: "User not found"});
+        }
+
+        res.status(200).json({user});
+})
+
+
+// @desc    delete user
+// @route   POST /users
+// @access  Public // no JWT required for signup as this is used for normal user 
+            //sighup and not for admin
+const signupUser = asyncHandler(async (req, res) => {
+    const {email,name,password}=req.body;
+    const roles = ["user"];
+        // check data
+        console.log(email,name,password);
+        if (!email || !name || !password ) {
+            return res.status(400).json({message: "Please enter all fields"});
+        }
+
+        // check if user already exists
+        const duplicate = await User.findOne({email}).lean().exec();
+        if (duplicate) {
+            return res.status(409).json({message: "User already exists"});
+        }
+    
+        // hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const userObject ={ email, name,"password": hashedPassword, roles };
+    
+        // create user
+        const user = await User.create(userObject);
+        if (!user) {
+            console.log(typeof user);
+            res.status(500).json({message: "Something went wrong"});
+        }else{
+            console.log("Normal User is created");
+            res.status(201).json({message: `${user} created successfully`});
+            // res.status(201).json({message: "User created successfully"});
+        }
+})
+
 module.exports = {
     getAllUsers,
     createNewUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    getUser,
+    signupUser
 }
