@@ -6,7 +6,7 @@ const User = require('../models/model.user')
 require('dotenv').config()
 
 //@desc Login
-//@route POST /auth
+//@route POST /auth/login
 //@sccess public
 const login = asyncHandler(async (req,res) => {
 
@@ -55,7 +55,7 @@ const login = asyncHandler(async (req,res) => {
     //create cookie wih refresh token
     res.cookie('jwt',refreshToken,{
         httpOnly:true,
-        secure: true,
+        // secure: true,
         sameSite: 'None',
         maxAge: 24 * 60 * 60 * 1000 //1d
     })
@@ -116,7 +116,7 @@ const logout =  (req,res) => {
      } 
      res.clearCookie('jwt',{
             httpOnly:true,
-            secure: true,
+            // secure: true,
             sameSite: 'None',})
     res.status(200).json({message:'Logout successfull'})
       
