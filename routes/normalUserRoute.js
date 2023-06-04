@@ -13,3 +13,4 @@ router.use(verifyJWT);
 router.route('/')
     .get(domainController.getUserDomains) //    /user/domains
     .post(domainController.createNewDomain) //  /user/domains
+    .patch(domainController.updateDomain) //    /user/domains

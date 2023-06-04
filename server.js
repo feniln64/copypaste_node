@@ -7,20 +7,27 @@ const {logger} =require('./middleware/logger')
 const corsOptions =require('./config/corsOptions')
 const dbConnection = require('./config/dbConnection')
 const mongoose = require('mongoose') 
+
+initRoutes = require('./routes/initRoutes')
 const PORT=process.env.PORT || 5000;
 
 const app =express()
 
 // app.use(logger)
-app.use(cors())
+app.use(cors(corsOptions))
 app.use(cookieParser());
 app.use(express.json());
 
-dbConnection()
 
+dbConnection()
+app.get('/',(req,res)=>{
+   console.log(req.hostname)
+    res.send("hello world")
+})
 app.use('/users',require('./routes/userRoutes'))
 app.use('/auth',require('./routes/authRoutes'))
-app.use('/subdomains',require('./routes/subdomainRoute'))
+app.use('/subdomain',require('./routes/subdomainRoute'))
+app.use('/init',require('./routes/initRoutes'))
 
 mongoose.connection.once('open',()=>{
     console.log("MongoDB connection established successfully");

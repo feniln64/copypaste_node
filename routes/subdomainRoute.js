@@ -9,6 +9,6 @@ router.use(verifyJWT);
 
 router.route('/') 
     .get(verifyRoles(roles[0],roles[1]),subdomainController.getAllSubdomain)
-    .post(subdomainController.createNewSubdomain)
+    // .post(subdomainController.createNewSubdomain)
 
 module.exports = router;

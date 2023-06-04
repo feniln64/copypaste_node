@@ -3,12 +3,12 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const loginLimiter = require('../middleware/loginLimiter');
 const userController = require('../controllers/userController');
-
+const getIP = require('../middleware/getIP');
 router.route('/signup') // /auth/signup
-    .post(userController.signupUser)
+    .post(getIP,userController.signupUser)
 
 router.route('/login') //      /auth/login
-    .post(loginLimiter, authController.login)
+    .post(getIP,loginLimiter, authController.login)
     
 
 router.route('/refresh')//     /auth/refresh

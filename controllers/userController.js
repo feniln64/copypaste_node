@@ -149,6 +149,7 @@ const signupUser = asyncHandler(async (req, res) => {
         if (!email || !name || !password ) {
             return res.status(400).json({message: "Please enter all fields"});
         }
+        // return res.status(201).json({message: `${name} created successfully`});
 
         // check if user already exists
         const duplicate = await User.findOne({email}).lean().exec();
@@ -164,7 +165,7 @@ const signupUser = asyncHandler(async (req, res) => {
         // create user
         const user = await User.create(userObject);
         if (!user) {
-            console.log(typeof user);
+            console.log("user not created")
             res.status(500).json({message: "Something went wrong"});
         }else{
             console.log("Normal User is created");
