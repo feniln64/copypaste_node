@@ -20,4 +20,7 @@ router.route('/:email')
 
 router.route("/:email/:content")
     .get(getUserContent.getAllContent) // /users/:email/content
+
+router.route('/profile')            // /users/profile
+    .post(userController.getUser)
 module.exports = router;

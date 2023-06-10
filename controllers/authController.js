@@ -20,7 +20,8 @@ const login = asyncHandler(async (req,res) => {
     if (!foundUser || !foundUser.active) {
         res.status(401).json({message:'Invalid credentials'})
     }
-
+    //remove after testing
+    console.log("Login dobe and found user = "+String(foundUser._id))
     const isMatch = await bcrypt.compare(password,foundUser.password)
 
     if (!isMatch) {
@@ -30,6 +31,7 @@ const login = asyncHandler(async (req,res) => {
     const accessToken = jwt.sign(
         {
             "UserInfo":{
+                "id": String(foundUser._id),
                 "username": foundUser.name,
                 "email": foundUser.email,
                 "roles": foundUser.roles,
@@ -37,10 +39,11 @@ const login = asyncHandler(async (req,res) => {
             },
         },
              process.env.ACCESS_TOKEN_SECRET,
-            {expiresIn: '55s'}
+            {expiresIn: '1h'}
     )
     const refreshToken = jwt.sign(
         { "UserInfo":{
+            "id": String(foundUser._id),
             "username": foundUser.name, 
             "email": foundUser.email,
              "roles": foundUser.roles, 
@@ -55,7 +58,7 @@ const login = asyncHandler(async (req,res) => {
     //create cookie wih refresh token
     res.cookie('jwt',refreshToken,{
         httpOnly:true,
-        // secure: true,
+        secure: true,
         sameSite: 'None',
         maxAge: 24 * 60 * 60 * 1000 //1d
     })
@@ -68,7 +71,7 @@ const login = asyncHandler(async (req,res) => {
 const refresh =  (req,res) => {
 
     const cookies = req.cookies
-
+    console.log("refresh token called")
     if (!cookies?.jwt) {
         return res.status(401).json({message:'Unauthenticated'})
     }
@@ -91,6 +94,7 @@ const refresh =  (req,res) => {
             const accessToken = jwt.sign(
                 {
                     "UserInfo":{
+                        "id": String(foundUser._id),
                         "username": foundUser.name,
                         "email": foundUser.email,
                         "roles": foundUser.roles,
@@ -98,7 +102,7 @@ const refresh =  (req,res) => {
                     }
                 },
                     process.env.ACCESS_TOKEN_SECRET,
-                    {expiresIn: '55s'}
+                    {expiresIn: '1h'}
             )
                 res.status(200).json({accessToken}) 
         })
@@ -116,7 +120,7 @@ const logout =  (req,res) => {
      } 
      res.clearCookie('jwt',{
             httpOnly:true,
-            // secure: true,
+            secure: true,
             sameSite: 'None',})
     res.status(200).json({message:'Logout successfull'})
       

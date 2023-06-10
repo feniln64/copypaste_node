@@ -1,5 +1,6 @@
 const User = require('../models/model.user');
 const Content = require('../models/model.content');
+const jwt =require('jsonwebtoken') 
 
 const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcryptjs');
@@ -122,18 +123,30 @@ const deleteUser = asyncHandler(async (req, res) => {
 })
 
 const getUser = asyncHandler(async (req, res) => {
-    const {email}=req.body;
-        console.log("Id is "+email);
-        if(!email){
-            return res.status(400).json({message: "User Email is required"});
-        }
+    const user=req.user;
+    console.log("User is "+user);
+    // const token = req.cookies.jwt;
+    // jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, async (err, decodedToken) => {
+    //     if (err) {
+    //         console.log(err.message);
+    //         res.locals.user = null;
+    //         res.status(401).json({message: "Unauthorized"});
+    //     } else {
+    //         console.log(decodedToken);
+    //     }});
+    return res.status(200).json({user});
+    // const {email}=req.body;
+    //     console.log("Id is "+email);
+    //     if(!email){
+    //         return res.status(400).json({message: "User Email is required"});
+    //     }
 
-        const user= await User.findOne(email).exec();
-        if(!user){
-            return res.status(404).json({message: "User not found"});
-        }
+    //     const user= await User.findOne(email).exec();
+    //     if(!user){
+    //         return res.status(404).json({message: "User not found"});
+    //     }
 
-        res.status(200).json({user});
+    //     res.status(200).json({user});
 })
 
 

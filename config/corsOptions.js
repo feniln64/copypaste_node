@@ -9,7 +9,7 @@ const re = new RegExp("(^|^[^:]+:\/\/|[^\.]+\.)readyle\.live");
 const corsOptions = {
   origin: allowedOrigins,
   optionsSuccessStatus: 200,
-  credentials: true
+  credentials: true,
 }
 
 module.exports = corsOptions
