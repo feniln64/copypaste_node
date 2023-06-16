@@ -4,7 +4,7 @@ const initDataController = require('../controllers/initController');
 const userController = require('../controllers/userController');
 
 router.route('/') // /init
-    .post(initDataController.initData)
+    .get(initDataController.initData)
 
 // router.route('/profile') // /init/profile
 //     .get(userController.getUser)

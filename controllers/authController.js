@@ -41,6 +41,13 @@ const login = asyncHandler(async (req,res) => {
              process.env.ACCESS_TOKEN_SECRET,
             {expiresIn: '1h'}
     )
+    const userInfo={
+        "id": String(foundUser._id),
+        "username": foundUser.name, 
+        "email": foundUser.email,
+         "roles": foundUser.roles, 
+         "premium_user": foundUser.premium_user
+         }
     const refreshToken = jwt.sign(
         { "UserInfo":{
             "id": String(foundUser._id),
@@ -63,7 +70,7 @@ const login = asyncHandler(async (req,res) => {
         maxAge: 24 * 60 * 60 * 1000 //1d
     })
 
-    res.status(200).json({accessToken})
+    res.status(200).json({accessToken,userInfo})
 })
 //@desc Resresh token
 //@route GET /auth/refresh
@@ -72,11 +79,14 @@ const refresh =  (req,res) => {
 
     const cookies = req.cookies
     console.log("refresh token called")
+   
+    
     if (!cookies?.jwt) {
+        console.log("no refresh token found")
         return res.status(401).json({message:'Unauthenticated'})
     }
     const refreshToken = cookies.jwt
-
+    console.log("refresh token found and is "+refreshToken)
     jwt.verify(
         refreshToken,
         process.env.REFRESH_TOKEN_SECRET,
@@ -90,7 +100,13 @@ const refresh =  (req,res) => {
             if (!foundUser ) {
                 return res.status(401).json({message:'Unauthenticated'})
             }
-        
+            const userInfo={
+                "id": String(foundUser._id),
+                "username": foundUser.name, 
+                "email": foundUser.email,
+                 "roles": foundUser.roles, 
+                 "premium_user": foundUser.premium_user
+                 }
             const accessToken = jwt.sign(
                 {
                     "UserInfo":{
@@ -104,7 +120,7 @@ const refresh =  (req,res) => {
                     process.env.ACCESS_TOKEN_SECRET,
                     {expiresIn: '1h'}
             )
-                res.status(200).json({accessToken}) 
+                res.status(200).json({accessToken,userInfo}) 
         })
     )
 }

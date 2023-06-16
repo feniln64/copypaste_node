@@ -6,8 +6,9 @@ const verifyJWT = (req, res, next) => {
     const authHeader = req.headers.authorization || req.headers.Authorization;
     console.log("verifyJWT called");
     
-    console.log(req.headers);
+    // console.log(req.headers);
     if(!authHeader?.startsWith('Bearer ')) {
+        console.log('Access token not found!');
         return res.status(401).send('Unauthorized! Need access token');
     }
 

@@ -123,8 +123,9 @@ const deleteUser = asyncHandler(async (req, res) => {
 })
 
 const getUser = asyncHandler(async (req, res) => {
-    const user=req.user;
-    console.log("User is "+user);
+    const user=req.body;
+    
+    console.log(user);
     // const token = req.cookies.jwt;
     // jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, async (err, decodedToken) => {
     //     if (err) {
@@ -134,7 +135,7 @@ const getUser = asyncHandler(async (req, res) => {
     //     } else {
     //         console.log(decodedToken);
     //     }});
-    return res.status(200).json({user});
+    return res.status(200).json({message: "User found"});
     // const {email}=req.body;
     //     console.log("Id is "+email);
     //     if(!email){

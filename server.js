@@ -8,7 +8,8 @@ const corsOptions =require('./config/corsOptions')
 const dbConnection = require('./config/dbConnection')
 const mongoose = require('mongoose') 
 
-initRoutes = require('./routes/initRoutes')
+
+
 const PORT=process.env.PORT || 5000;
 
 const app =express()
@@ -28,6 +29,7 @@ app.use('/users',require('./routes/userRoutes'))
 app.use('/auth',require('./routes/authRoutes'))
 app.use('/subdomain',require('./routes/subdomainRoute'))
 app.use('/init',require('./routes/initRoutes'))
+app.use('/content',require('./routes/contentRoutes'))
 
 mongoose.connection.once('open',()=>{
     console.log("MongoDB connection established successfully");
