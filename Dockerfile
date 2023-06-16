@@ -3,8 +3,7 @@ WORKDIR /app
 COPY package.json ./
 COPY package-lock.json ./
 COPY ./ ./
-RUN npm ci
-RUN npm run build
+RUN npm install
 
 CMD ["npm", "start"]
 
