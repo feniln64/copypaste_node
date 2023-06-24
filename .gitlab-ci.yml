@@ -45,10 +45,12 @@ deploy:
     - ssh-add "$SSH_PRIVATE_KEY"
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
+    - chmod 400 $SSH_PRIVATE_KEY
+    - ssh-keyscan $SERVER_HOST_NAME >> ~/.ssh/known_hosts
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     
   script:
-    - chmod 400 $SSH_KEY
+    
     - ssh -i $SSH_KEY ubuntu@$SERVER_HOST_NAME "echo $CI_REGISTRY_PASSWORD |docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin; sudo docker pull registry.gitlab.com/do-copypaste/copypaste_node:latest ; cd copypaste_node; docker-compose up -d"
   only:
     - main                                                                                                                                                                            
