@@ -15,19 +15,26 @@ docker-build:
     - docker push $CI_REGISTRY_IMAGE
     - echo "Registry image:" $CI_REGISTRY_IMAGE
   only:
-    - main
+    - master
 
 deploy:
   stage: deploy
   before_script:
-    - apt-get update -qq
-    - apt-get install -qq git
-    # Setup SSH deploy keys
-    - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+    # - apt-get update -qq
+    # - apt-get install -qq git
+    # # Setup SSH deploy keys
+    # - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+    # - eval $(ssh-agent -s)
+    # - ssh-add <(echo "$SSH_KEY" | base64 -d)
+    # - mkdir -p ~/.ssh
+    # - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )' 
     - eval $(ssh-agent -s)
-    - ssh-add <(echo "$SSH_KEY" | base64 -d)
+    - echo "$SSH_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
-    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $SERVER_HOST_NAME >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
     
   script:
     - chmod 400 $SSH_KEY
