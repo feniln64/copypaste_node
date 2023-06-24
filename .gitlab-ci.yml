@@ -15,17 +15,26 @@ docker-build:
     - docker push $CI_REGISTRY_IMAGE
     - echo "Registry image:" $CI_REGISTRY_IMAGE
   only:
-    - master
+    - main
 
-# deploy:
-#   stage: deploy
-#   image: linuxserver/openssh-server
-#   before_script:
-#     - echo "deploying app"
-#   script:
-#     - chmod 400 $LOGIN_FILE
-#     - ssh -o StrictHostKeyChecking=no -i $LOGIN_FILE ubuntu@$PASSWD "echo $CI_REGISTRY_PASSWORD |docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin; sudo docker pull registry.gitlab.com/do-copypaste/copypaste_node:latest ; cd server; docker-compose up -d"
-                                                                                                                                                                                      
+deploy:
+  stage: deploy
+  image: linuxserver/openssh-server
+  before_script:
+    - apt-get update -qq
+    - apt-get install -qq git
+    # Setup SSH deploy keys
+    - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    
+  script:
+    - chmod 400 $SSH_KEY
+    - ssh -i $SSH_KEY ubuntu@$SERVER_HOST_NAME "echo $CI_REGISTRY_PASSWORD |docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin; sudo docker pull registry.gitlab.com/do-copypaste/copypaste_node:latest ; cd copypaste_node; docker-compose up -d"
+  only:
+    - main                                                                                                                                                                            
 
 
 
