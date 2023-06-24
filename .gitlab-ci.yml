@@ -19,7 +19,6 @@ docker-build:
 
 deploy:
   stage: deploy
-  image: linuxserver/openssh-server
   before_script:
     - apt-get update -qq
     - apt-get install -qq git
