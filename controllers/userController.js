@@ -125,6 +125,7 @@ const deleteUser = asyncHandler(async (req, res) => {
 const getUser = asyncHandler(async (req, res) => {
     const user=req.body;
     
+    const email=req.query.email; // domaim.com/uri?email=xyz&name=abc
     console.log(user);
     // const token = req.cookies.jwt;
     // jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, async (err, decodedToken) => {
@@ -187,6 +188,7 @@ const signupUser = asyncHandler(async (req, res) => {
             // res.status(201).json({message: "User created successfully"});
         }
 })
+
 
 module.exports = {
     getAllUsers,

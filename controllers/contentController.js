@@ -46,7 +46,10 @@ const createNewContent = asyncHandler(async (req, res) => {
 
 const getUserContent = asyncHandler(async (req, res) => {
     
-    const content = await Content.find().lean();
+    const email=req.params.email; //doimain.com/users/email(value of email)
+    const content=req.params.content;
+
+    // const content = await Content.find().lean();
     if(!content?.length){
         return res.status(404).json({message: "No content found"});
     }
@@ -56,5 +59,6 @@ const getUserContent = asyncHandler(async (req, res) => {
 
 module.exports = {
     getAllContent,
-    createNewContent
+    createNewContent,
+    getUserContent
 }

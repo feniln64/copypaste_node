@@ -6,6 +6,8 @@ const userController = require('../controllers/userController');
 router.route('/') // /init
     .get(initDataController.initData)
 
+router.route('/dns') // /init
+    .get(initDataController.getDns)
 // router.route('/profile') // /init/profile
 //     .get(userController.getUser)
 module.exports = router;

@@ -6,7 +6,7 @@ const path = require('path')
 const {logger} =require('./middleware/logger')
 const corsOptions =require('./config/corsOptions')
 const dbConnection = require('./config/dbConnection')
-const mongoose = require('mongoose') 
+const mongoose = require('mongoose'); 
 
 
 
