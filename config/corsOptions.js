@@ -4,7 +4,9 @@ const allowedOrigins=[
   'https://localhost:4100',
   'https://new.localhost:4100',
   'http://vscode.readyle.live:3000',
-  'http://test.readyle.live:5000'
+  'http://test.readyle.live:5000',
+  'https://react.readyle.live',
+  'http://react.readyle.live',
 ]
 
 const re = new RegExp("(^|^[^:]+:\/\/|[^\.]+\.)readyle\.live");
