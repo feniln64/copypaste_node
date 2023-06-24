@@ -17,8 +17,11 @@ docker-build:
   only:
     - master
 
+#deploy with ssh key
+
 deploy:
   stage: deploy
+  image: ubuntu:latest
   before_script:
     # - apt-get update -qq
     # - apt-get install -qq git
@@ -28,13 +31,20 @@ deploy:
     # - ssh-add <(echo "$SSH_KEY" | base64 -d)
     # - mkdir -p ~/.ssh
     # - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )' 
+ 
+    # - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )' 
+    # - eval $(ssh-agent -s)
+    # - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    # - mkdir -p ~/.ssh
+    # - chmod 700 ~/.ssh
+    # - ssh-keyscan $SERVER_HOST_NAME >> ~/.ssh/known_hosts
+    # - chmod 644 ~/.ssh/known_hosts
+
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
     - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - ssh-keyscan $SERVER_HOST_NAME >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     
   script:
     - chmod 400 $SSH_KEY
