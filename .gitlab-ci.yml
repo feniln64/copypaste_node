@@ -42,10 +42,10 @@ deploy:
 
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
+    - chmod 400 $SSH_PRIVATE_KEY
     - ssh-add "$SSH_PRIVATE_KEY"
     - mkdir -p ~/.ssh
     - chmod 700 ~/.ssh
-    - chmod 400 $SSH_PRIVATE_KEY
     - ssh-keyscan $SERVER_HOST_NAME >> ~/.ssh/known_hosts
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     
