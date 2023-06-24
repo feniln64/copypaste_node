@@ -1,0 +1,24 @@
+version: '3'
+services:
+  node:
+    build: .
+    container_name: node
+    restart: unless-stopped
+    env_file: .env
+    networks:
+      - traefik-net
+    ports:
+      - 5000
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.node.rule=Host(`node.readyle.live`)"
+      - "traefik.http.services.node.loadbalancer.server.port=5000"
+      - "traefik.http.routers.node.tls.certresolver=lets-encrypt"
+      - "traefik.http.routers.node.tls=true"
+      - "traefik.http.routers.node.entrypoints=websecure"
+      - "traefik.docker.network=traefik-net"
+  
+
+networks:
+  traefik-net:
+    external: true
