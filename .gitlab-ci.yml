@@ -23,6 +23,7 @@ deploy:
   stage: deploy
   image: ubuntu:latest
   before_script:
+    - pwd
     # - apt-get update -qq
     # - apt-get install -qq git
     # # Setup SSH deploy keys
@@ -40,19 +41,19 @@ deploy:
     # - ssh-keyscan $SERVER_HOST_NAME >> ~/.ssh/known_hosts
     # - chmod 644 ~/.ssh/known_hosts
 
-    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-    - pwd
-    - eval $(ssh-agent -s)
-    - chmod 400 $SSH_PRIVATE_KEY
-    - ssh-add "$SSH_PRIVATE_KEY"
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - ssh-keyscan $SERVER_HOST_NAME >> ~/.ssh/known_hosts
-    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+#    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+#
+ #   - eval $(ssh-agent -s)
+ #   - chmod 400 $SSH_PRIVATE_KEY
+ #   - ssh-add "$SSH_PRIVATE_KEY"
+ #   - mkdir -p ~/.ssh
+ #   - chmod 700 ~/.ssh
+ #   - ssh-keyscan $SERVER_HOST_NAME >> ~/.ssh/known_hosts
+ #   - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     
   script:
     
-    - ssh -i $SSH_KEY ubuntu@$SERVER_HOST_NAME "echo $CI_REGISTRY_PASSWORD |docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin; sudo docker pull registry.gitlab.com/do-copypaste/copypaste_node:latest ; cd copypaste_node; docker-compose up -d"
+    - ssh ubuntu@$SERVER_HOST_NAME "echo $CI_REGISTRY_PASSWORD |docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin; sudo docker pull registry.gitlab.com/do-copypaste/copypaste_node:latest ; cd copypaste_node; docker-compose up -d"
   only:
     - main                                                                                                                                                                            
 
