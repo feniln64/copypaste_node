@@ -1,0 +1,37 @@
+version: 2.1
+
+jobs:
+  build:
+    machine:
+      image: ubuntu-2004:current
+      docker_layer_caching: true
+    resource_class: arm.medium
+    # docker:
+    #   - image: cimg/base:stable
+    steps:
+      - checkout
+      - run:
+          name: "Say hello"
+          command: "docker -v"
+  
+  # deploy:
+  #   docker:
+  #     - image: cimg/base:stable
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: "Say hello"
+  #         command: "echo Hello, World!"
+
+# Orchestrate jobs using workflows
+# See: https://circleci.com/docs/configuration-reference/#workflows
+workflows:
+  build-and-deploy:
+    jobs:
+      - build
+      # - deploy:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only: main
