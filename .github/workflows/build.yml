@@ -23,10 +23,12 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
+          platforms: linux/arm64,linux/arm/v8
           push: true
           tags: registry.gitlab.com/do-copypaste/copypaste_node:latest
   
   deploy:
+    needs: docker-build-push
     runs-on: ubuntu-latest
     steps:
     - name: multiple command
