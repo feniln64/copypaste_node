@@ -8,7 +8,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: Set up QEMU
+      - name: Set up QEM
         uses: docker/setup-qemu-action@v2
         with:
           platforms: 'arm64,arm'
