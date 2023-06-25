@@ -13,6 +13,9 @@ jobs:
       - run:
           name: "Say hello"
           command: "echo glpat-Yzxat7LUxvpoGyy85WJj | docker login -u FenilN39 registry.gitlab.com"
+      - run:
+          name: "Say hello"
+          command: "echo $GITLAB_REGISTRY_TOKEN | docker login -u $GITLAB_REGISTRY_USERNAME registry.gitlab.com --password-stdin"
   
   # deploy:
   #   docker:
