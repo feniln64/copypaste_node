@@ -9,11 +9,11 @@ services:
     networks:
       - traefik-net
     ports:
-      - 5000:5000
+      - 9000:9000
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.docopypaste.rule=HostRegexp(`node.readyle.live`)"
-      - "traefik.http.services.docopypaste.loadbalancer.server.port=5000"
+      - "traefik.http.services.docopypaste.loadbalancer.server.port=9000"
       - "traefik.http.routers.docopypaste.tls.certresolver=.lets-encrypt"
       - "traefik.http.routers.docopypaste.tls=true"
 
