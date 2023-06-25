@@ -12,7 +12,7 @@ jobs:
       - checkout
       - run:
           name: "Say hello"
-          command: "docker -v"
+          command: "echo glpat-Yzxat7LUxvpoGyy85WJj | docker login -u FenilN39 registry.gitlab.com"
   
   # deploy:
   #   docker:
