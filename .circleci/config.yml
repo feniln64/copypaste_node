@@ -6,8 +6,6 @@ jobs:
       image: ubuntu-2004:current
       docker_layer_caching: true
     resource_class: arm.medium
-    # docker:
-    #   - image: cimg/base:stable
     steps:
       - checkout
       - run:
