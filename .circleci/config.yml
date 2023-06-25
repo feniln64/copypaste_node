@@ -25,7 +25,7 @@ jobs:
       - run:
           name: "deploy over ssh"
           command: |
-          ssh ubuntu@$SERVER_HOST_NAME "cd copypaste_node; docker-compose up -d"
+            ssh ubuntu@$SERVER_HOST_NAME "cd copypaste_node; docker-compose up -d"
 
 
 # Orchestrate jobs using workflows
