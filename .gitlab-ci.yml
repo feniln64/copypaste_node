@@ -26,7 +26,7 @@ deploy:
     - chmod 600 $SSH_PRIVATE_KEY
   script:
     
-    - ssh ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ubuntu@$SERVER_HOST_NAME "echo $CI_REGISTRY_PASSWORD |docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin; sudo docker pull registry.gitlab.com/do-copypaste/copypaste_node:latest ; cd copypaste_node; docker-compose up -d"
+    - ssh -o StrictHostKeyChecking=no -i $SSH_PRIVATE_KEY ubuntu@$SERVER_HOST_NAME "echo $CI_REGISTRY_PASSWORD |docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin; sudo docker pull registry.gitlab.com/do-copypaste/copypaste_node:latest ; cd copypaste_node; docker-compose up -d"
   only:
     - main                                                                                                                                                                            
 
