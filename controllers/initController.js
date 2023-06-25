@@ -1,9 +1,6 @@
 
 const asyncHandler = require('express-async-handler');
 const { json } = require('body-parser');
-const site_id = process.env.NETLIFY_SITE_ID;
-const dns_zone_id = process.env.NETLIFY_DNS_ZONE_ID;
-const axiosInstance = require('../netlifyApi/api');
 
 // @desc    Get all data
 // @route   GET /init

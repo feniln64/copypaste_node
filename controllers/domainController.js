@@ -2,11 +2,8 @@ const Content = require('../models/model.content');
 const Subdomain = require('../models/model.subdomain');
 const asyncHandler = require('express-async-handler');
 const { json } = require('body-parser');
-const axiosInstance = require('../netlifyApi/api');
-const dns_zone_id = process.env.NETLIFY_DNS_ZONE_ID;
 require('dotenv').config
 // import { NetlifyAPI } from 'module';
-const site_id=process.env.NETLIFY_SITE_ID;
 // const client = new NetlifyAPI(process.env.NETLIFY_TOKEN)
 
 
