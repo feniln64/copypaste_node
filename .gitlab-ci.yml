@@ -21,7 +21,7 @@ docker-build:
 
 deploy:
   stage: deploy
-  image: dannranny/ssh-agent:tagname
+  image: dannranny/ssh-agent:latest
   before_script:
     - chmod 600 $SSH_PRIVATE_KEY
   script:
