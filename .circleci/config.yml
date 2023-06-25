@@ -11,17 +11,22 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Say hello"
+          name: "docker login"
           command: "echo $GITLAB_REGISTRY_TOKEN | docker login -u $GITLAB_REGISTRY_USERNAME registry.gitlab.com --password-stdin"
+      - run:
+          name: "docker build"
+          command: "docker build --pull -t registry.gitlab.com/do-copypaste/copypaste_node:latest ."
   
-  # deploy:
-  #   docker:
-  #     - image: cimg/base:stable
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: "Say hello"
-  #         command: "echo Hello, World!"
+  deploy:
+    machine:
+      image: ubuntu-2004:current
+      docker_layer_caching: true
+    steps:
+      - run:
+          name: "deploy over ssh"
+          command: |
+          ssh ubuntu@$SERVER_HOST_NAME "cd copypaste_node; docker-compose up -d"
+
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
