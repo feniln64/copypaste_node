@@ -1,15 +1,48 @@
+const { default: axios } = require('axios');
+
 require('dotenv').config
 
-const cf = require('cloudflare')({
-    email: "fenilnakrani39@gmail.com",
-    key: "721d500a5a04d543e57d3a2c17e4bbe1036f2"
-  });
 
-cf.zones.read("ac2a7392c9f304dea26c229e08f8efc5")
-.then((response) => {
-    console.log(response);
-})
-.catch((error) => {
-    console.log(error);
-});
-module.exports = cf;
+const cf = axios.create({
+    baseURL: 'https://api.cloudflare.com/client/v4'
+  },
+  );
+
+
+module.exports = {
+  createSubdoamin :function (subdomain) {
+
+    const payload ={
+        "content": "@",
+        "name": subdomain,
+        "proxied": false,
+        "type": "CNAME",
+        "comment": "CNAME for readyle.live react app",
+      }
+    
+      try {
+          cf.post(`zones/ac2a7392c9f304dea26c229e08f8efc5/dns_records`, payload)
+            .then((response) => {
+              const record_id=response.data.result.id
+              console.log("record id "+record_id);
+              return record_id
+            })
+            .catch((error) => {
+              console.log(error);
+              return ""
+              
+            });
+        }
+        catch (error) {
+          if (error.response) {
+            console.log(error.response);
+            alert(error.response.data.message);
+          } else if (error.request) {
+            console.log("network error");
+          } else {
+            console.log(error);
+          }
+        }
+      }
+}
+

@@ -13,7 +13,12 @@ const subDoaminSchema =new mongoose.Schema({
     active:{
         type: Boolean,
         default: true
-    }
+    },
+    dns_record_id:{
+        type: String,
+        required: true
+    },
+
 },
 {
     timestamps: true

@@ -7,8 +7,9 @@ const roles=require('../config/roles');// roles[0]== admin, roles[1]==moderator,
 
 router.use(verifyJWT);
 
-router.route('/') 
-    .get(subdomainController.getAllSubdomain)
+router.route('/create') 
     .post(subdomainController.createNewSubdomain)
+router.route('/getall')
+    .get(subdomainController.getAllSubdomain)
 
 module.exports = router;
