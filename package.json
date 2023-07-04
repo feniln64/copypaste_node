@@ -30,6 +30,7 @@
     "mongoose-sequence": "^5.3.1",
     "multer": "^1.4.5-lts.1",
     "node-libcurl": "^3.0.0",
+    "object-sizeof": "^2.6.2",
     "uuid": "^9.0.0",
     "uuidv4": "^6.2.13"
   },
