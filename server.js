@@ -25,7 +25,7 @@ app.get('/',(req,res)=>{
    console.log(req.hostname)
     res.send("hello world")
 })
-app.use('/users',require('./routes/userRoutes'))
+app.use('/user',require('./routes/userRoutes'))
 app.use('/auth',require('./routes/authRoutes'))
 app.use('/subdomain',require('./routes/subdomainRoute'))
 app.use('/init',require('./routes/initRoutes'))

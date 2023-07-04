@@ -11,18 +11,17 @@ router.use(verifyJWT);
 // admin routes
 router.route('/')
     .get(userController.getAllUsers) // /users
-    .post(verifyRoles(roles[0],roles[1]),userController.createNewUser) // /users
-    .patch(verifyRoles(roles[0],roles[1]),userController.updateUser) // /users
-    .delete(verifyRoles(roles[0]),userController.deleteUser) // /users
+    .post(userController.createNewUser) // /users
+    .delete(userController.deleteUser) // /users
 
-router.route('/user')
-    .get(userController.getUser) // /users/:email
+router.route('/:userId/update')
+    .patch(userController.updateUser) // /users/:email
 
-router.route("/:email/:content")
+router.route("/:userId/:content")
     .get(contentController.getUserContent) // /users/:email/content
 
 router.route('/profile')            // /users/profile
-    .post(userController.getUser)
+    .get(userController.getUser)
 
 
 module.exports = router;

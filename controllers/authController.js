@@ -34,7 +34,6 @@ const login = asyncHandler(async (req,res) => {
                 "id": String(foundUser._id),
                 "username": foundUser.name,
                 "email": foundUser.email,
-                "roles": foundUser.roles,
                 "premium_user": foundUser.premium_user,
             },
         },
@@ -45,7 +44,6 @@ const login = asyncHandler(async (req,res) => {
         "id": String(foundUser._id),
         "username": foundUser.name, 
         "email": foundUser.email,
-         "roles": foundUser.roles, 
          "premium_user": foundUser.premium_user
          }
     const refreshToken = jwt.sign(
@@ -53,7 +51,6 @@ const login = asyncHandler(async (req,res) => {
             "id": String(foundUser._id),
             "username": foundUser.name, 
             "email": foundUser.email,
-             "roles": foundUser.roles, 
              "premium_user": foundUser.premium_user
              }
         },
@@ -104,7 +101,6 @@ const refresh =  (req,res) => {
                 "id": String(foundUser._id),
                 "username": foundUser.name, 
                 "email": foundUser.email,
-                 "roles": foundUser.roles, 
                  "premium_user": foundUser.premium_user
                  }
             const accessToken = jwt.sign(
@@ -113,7 +109,6 @@ const refresh =  (req,res) => {
                         "id": String(foundUser._id),
                         "username": foundUser.name,
                         "email": foundUser.email,
-                        "roles": foundUser.roles,
                         "premium_user": foundUser.premium_user,
                     }
                 },

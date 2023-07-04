@@ -54,17 +54,17 @@ const createNewUser = asyncHandler(async (req, res) => {
 })
 
 // @desc    update user
-// @route   POST /users
+// @route   POST /user/:userId/update
 // @access  Private
 const updateUser = asyncHandler(async (req, res) => {
-    const {email,name,roles,active,premium_user,password}=req.body;
-    // console.log(email,name,roles,active,premium_user);
-    console.log(req.body.id);
-    if(!email || !name || !Array.isArray(roles) || typeof active !== "boolean" || typeof !premium_user !== "boolean"){
-        return res.status(400).json({message: "All fields are required.."});
+    const {email,name}=req.body;
+   
+    
+    if(!email || !name ){
+        return res.status(400).json({message: "Email and Name is required"});
     }
 
-    const user = await User.findOne({email:email}).exec();
+    const user = await User.findOne({_id:req.params.userId}).exec();
     if(!user){
         return res.status(404).json({message: "User not found"});
     }
@@ -77,9 +77,7 @@ const updateUser = asyncHandler(async (req, res) => {
 
     user.email = email;
     user.name = name;
-    user.roles = roles;
-    user.active = active;
-    user.premium_user = premium_user;
+
 
     if(password){
         const hashedPassword = await bcrypt.hash(password, 10);

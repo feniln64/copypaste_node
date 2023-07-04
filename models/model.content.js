@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 const contentSchema =new mongoose.Schema({
-    user:{
+    userId:{
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'User'
@@ -10,6 +10,10 @@ const contentSchema =new mongoose.Schema({
     content:{
         type: String,  //add constraint to frontend also minimum 3 characters required
         required: true
+    },
+    is_protected:{
+        type: Boolean,
+        default: false
     }
 },
 {

@@ -4,7 +4,7 @@ const initDataController = require('../controllers/initController');
 const userController = require('../controllers/userController');
 
 router.route('/') // /init
-    .get(initDataController.initData)
+    .post(initDataController.initData)
 
 router.route('/dns') // /init
     .get(initDataController.getDns)
