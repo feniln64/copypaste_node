@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package.json ./
 COPY package-lock.json ./
 COPY ./ ./
-RUN npm ci
+RUN npm install --build-from-resource
 
 CMD ["npm", "start"]
 
