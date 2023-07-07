@@ -1,6 +1,7 @@
 const Content = require('../models/model.content');
 const asyncHandler = require('express-async-handler');
 const { json } = require('body-parser');
+const sizeof = require('object-sizeof')
 
 // @desc    Get all subdoamins
 // @route   GET /subdoamin
@@ -19,6 +20,7 @@ const getAllContent = asyncHandler(async (req, res) => {
 // @access  Private
 const createNewContent = asyncHandler(async (req, res) => {
     const { content, is_protected } = req.body;
+
     const userId = req.params.userId;
     // console.log(content);
 
@@ -26,17 +28,22 @@ const createNewContent = asyncHandler(async (req, res) => {
     if (!content || typeof is_protected !== "boolean") {
         return res.status(400).json({ message: "content and is_protected boolean is required" });
     }
+    const content_size = sizeof(content);
+    console.log("content_size =", content_size);
+    if (content_size > 28000) {
+        return res.status(413).json({ message: "Content is to large" });
+    }
     const contentObject = { userId, content, is_protected };
 
     // check if content already exists the update content with new values
     const already_exist = await Content.findOne({ userId }).lean();
-    console.log("already_exist =", already_exist);
+    // console.log("already_exist =", already_exist);
     if (already_exist) {
         
         const update_content= await Content.updateOne(contentObject);
-        console.log(update_content);
+        // console.log(update_content);
         if (!update_content) {
-            console.log("update_content =", update_content);
+            // console.log("update_content =", update_content);
             return res.status(500).json({ message: "Problem updating cpontent" });
         } else {
             return res.status(201).json({ message: `content updateaed successfully` });
