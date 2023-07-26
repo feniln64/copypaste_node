@@ -32,12 +32,16 @@ const getAllSubdomain = asyncHandler(async (req, res) => {
 // @access  Private
 const createNewSubdomain = asyncHandler(async (req, res) => {
   const { subdomain ,userId,active} = req.body;
+  console.log("createNewSubdomain called");
+  console.log("subdomain =", subdomain);
+  console.log("userId =", userId);
+  console.log("active =", active);
   if (!userId || !subdomain || typeof active !== "boolean" ) {
       if(!active)
       {
         return res.status(400).json({ message: "user is not active" });
       }
-      return res.status(400).json({message: "Please enter all fields"});
+      return res.status(400).json({message: "userId, subdomain and active type are required to create subdomain"});
   }
  
   // check if subdomain already exists
@@ -120,13 +124,25 @@ const updateDomain = asyncHandler(async (req, res) => {
   if (!updateSubDomain) {
     res.status(500).json({ message: "Something went wrong" });
   } else {
-    res.status(200).json({ message: `${name} updated successfully}` });
+    res.status(200).json({ message: ` updated successfully` });
   }
 
+})
+
+const getSubdomainByUserId = asyncHandler(async (req, res) => {
+  const  userId  = req.params;
+  console.log("getSubdomainByUserId called");
+  const subdomains = await Subdomain.find(userId).lean().exec();
+  console.log("subdomains =",subdomains);
+  if (!subdomains?.length) {
+    return res.status(404).json({ message: "No subdomains found" });
+  }
+  return res.json(subdomains);
 })
 
 module.exports = {
   getAllSubdomain,
   createNewSubdomain,
-  updateDomain
+  updateDomain,
+  getSubdomainByUserId
 }

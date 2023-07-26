@@ -70,7 +70,9 @@ const getUserContent = asyncHandler(async (req, res) => {
 
     const userId = req.params.userId; //doimain.com/users/email(value of email)
     // const content = req.params.content;
-    const already_exist = await Content.findOne({ userId }).lean().exec();
+    console.log("userId =", userId);
+    console.log("get content by ID called");
+    const already_exist = await Content.findOne({ userId }).lean();
     if (!already_exist) {
         return res.status(404).json({ message: "No content found" });
     }

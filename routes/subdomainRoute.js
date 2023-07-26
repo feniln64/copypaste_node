@@ -5,11 +5,14 @@ const verifyJWT = require('../middleware/verifyJWT');
 const verifyRoles = require('../middleware/verifyRoles');
 const roles=require('../config/roles');// roles[0]== admin, roles[1]==moderator, roles[2]==user
 
-router.use(verifyJWT);
+// router.use(verifyJWT);
 
 router.route('/create') 
     .post(subdomainController.createNewSubdomain)
 router.route('/getall')
     .get(subdomainController.getAllSubdomain)
+
+router.route('/:userId')
+    .get(subdomainController.getSubdomainByUserId)
 
 module.exports = router;

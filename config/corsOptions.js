@@ -2,6 +2,7 @@
 const allowedOrigins=[
   'http://localhost:3000',
   'http://new.localhost:3000',
+  'http://new.test.localhost:3000',
 
   'http://test.localhost:3000',
 
