@@ -15,7 +15,10 @@ const initData = asyncHandler(async (req, res) => {
     // const userId = req.params.userId; //doimain.com/users/email(value of email)
 
     const already_exist = await Subdomain.findOne({ subdomain:sub }).lean();
-    // console.log("already_exist =", already_exist);
+    if (!already_exist) {
+        return res.status(404).json({ message: "No subdomain found" });
+    }
+    console.log("already_exist =", already_exist);
     const userId=already_exist.userId;
     console.log("userId =", userId.toString());
     const contentObject = await Content.findOne({ userId }).lean();
