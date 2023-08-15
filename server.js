@@ -7,7 +7,6 @@ const {logger} =require('./middleware/logger')
 const corsOptions =require('./config/corsOptions')
 const dbConnection = require('./config/dbConnection')
 const mongoose = require('mongoose'); 
-require('newrelic');
 const serverless = require('serverless-http');
 
 
