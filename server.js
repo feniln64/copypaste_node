@@ -8,6 +8,7 @@ const corsOptions =require('./config/corsOptions')
 const dbConnection = require('./config/dbConnection')
 const mongoose = require('mongoose'); 
 require('newrelic');
+const serverless = require('serverless-http');
 
 
 const PORT=process.env.PORT || 9000;
@@ -42,3 +43,5 @@ mongoose.connection.on('error',(err)=>{
     console.log("MongoDB connection error. Please make sure MongoDB is running. "+err);
     process.exit();
 })
+
+module.exports.handler = serverless(app);
