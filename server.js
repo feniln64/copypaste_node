@@ -8,8 +8,6 @@ const corsOptions =require('./config/corsOptions')
 const dbConnection = require('./config/dbConnection')
 const mongoose = require('mongoose'); 
 const serverless = require('serverless-http');
-
-
 const PORT=process.env.PORT || 9000;
 
 const app =express()
