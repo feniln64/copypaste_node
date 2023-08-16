@@ -20,9 +20,11 @@ const getAllContent = asyncHandler(async (req, res) => {
 // @access  Private
 const createNewContent = asyncHandler(async (req, res) => {
     const { content, is_protected } = req.body;
-
+    console.log("create content called");
     const userId = req.params.userId;
-    // console.log(content);
+    console.log("userId =", userId);
+    console.log("content =", content);
+    console.log("is_protected =", is_protected);
 
     // check data if all correct ctreate "contentObject"
     if (!content || typeof is_protected !== "boolean") {
