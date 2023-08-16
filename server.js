@@ -9,7 +9,8 @@ const dbConnection = require('./config/dbConnection')
 const mongoose = require('mongoose'); 
 const serverless = require('serverless-http');
 const PORT=process.env.PORT || 9000;
-
+var pjson = require('./package.json');
+console.log(pjson.version);
 const app =express()
 
 // app.use(logger)
@@ -21,7 +22,7 @@ app.use(express.json());
 dbConnection()
 app.get('/',(req,res)=>{
    console.log(req.hostname)
-    res.send("hello world")
+    res.send("hello world version "+pjson.version+" "+req.hostname)
 })
 app.use('/user',require('./routes/userRoutes'))
 app.use('/auth',require('./routes/authRoutes'))
