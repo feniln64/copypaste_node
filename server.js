@@ -40,9 +40,10 @@ app.use(express.json());
 dbConnection()
 app.get('/',(req,res)=>{
    console.log(req.hostname)
-    res.send("hello world version : "+pjson.version)
+    res.redirect('/url/test/url');
+    // ("hello world version : "+pjson.version)
 })
-app.get('/url',(req,res)=>{
+app.get('/url/test/url',(req,res)=>{
     console.log(req.hostname)
      res.send(`<h1>hello world version : <h1>`+pjson.version)
  })
@@ -56,6 +57,7 @@ mongoose.connection.once('open',()=>{
     console.log("MongoDB connection established successfully");
     app.listen(PORT,()=>{
         console.log("server running on port "+PORT);
+        console.log("http://localhost:"+PORT);
     })
 })
 
