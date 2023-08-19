@@ -7,6 +7,11 @@ const userSchema =new mongoose.Schema(
         required: true,
         unique: true
     },
+    username:{
+        type: String,  //add constraint to frontend also minimum 3 characters required
+        required: true,
+        unique: true
+    },
     name:{
         type: String,  //add constraint to frontend also minimum 3 characters required
         required: true

@@ -10,9 +10,27 @@ const mongoose = require('mongoose');
 const serverless = require('serverless-http');
 const PORT=process.env.PORT || 9000;
 var pjson = require('./package.json');
-console.log(pjson.version);
+const swaggerUi = require('swagger-ui-express');
+const swaggerjsDoc = require('swagger-jsdoc');
 const app =express()
 
+const swaggerOptions = {
+    swaggerDefinition: {
+        info: {
+            title: 'Content Management System',
+            description: 'Content Management System API Information',
+            contact: {
+                name: "Amazing Developer"
+            },
+            servers: ["http://localhost:3000"]
+        }
+    },
+    apis: ["./routes/*.js"]
+}
+
+const swaggerDocs = swaggerjsDoc(swaggerOptions);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // app.use(logger)
 app.use(cors(corsOptions))
 app.use(cookieParser());
@@ -22,8 +40,12 @@ app.use(express.json());
 dbConnection()
 app.get('/',(req,res)=>{
    console.log(req.hostname)
-    res.send("hello world version "+pjson.version+" "+req.hostname)
+    res.send("hello world version : "+pjson.version)
 })
+app.get('/url',(req,res)=>{
+    console.log(req.hostname)
+     res.send("hello world version : "+pjson.version)
+ })
 app.use('/user',require('./routes/userRoutes'))
 app.use('/auth',require('./routes/authRoutes'))
 app.use('/subdomain',require('./routes/subdomainRoute'))
