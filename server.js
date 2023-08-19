@@ -44,7 +44,7 @@ app.get('/',(req,res)=>{
 })
 app.get('/url',(req,res)=>{
     console.log(req.hostname)
-     res.send("hello world version : "+pjson.version)
+     res.send(`<h1>hello world version : <h1>`+pjson.version)
  })
 app.use('/user',require('./routes/userRoutes'))
 app.use('/auth',require('./routes/authRoutes'))
