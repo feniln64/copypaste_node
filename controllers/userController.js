@@ -156,10 +156,11 @@ const deleteUser = asyncHandler(async (req, res) => {
 })
 
 const getUser = asyncHandler(async (req, res) => {
-    const user = req.body;
-
-    const email = req.query.email; // domaim.com/uri?email=xyz&name=abc
-    console.log(user);
+    // const user = req.body;
+    const userId = req.params.userId;
+    // const email = req.query.email; // domaim.com/uri?email=xyz&name=abc
+    console.log(userId);
+    console.log("get user profile by ID called");
     // const token = req.cookies.jwt;
     // jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, async (err, decodedToken) => {
     //     if (err) {
@@ -169,14 +170,15 @@ const getUser = asyncHandler(async (req, res) => {
     //     } else {
     //         console.log(decodedToken);
     //     }});
-    return res.status(200).json({ message: "User found" });
+    const user= await User.findOne({userId}).lean().exec();
+    console.log(user);
+    return res.status(200).json({ message: user });
     // const {email}=req.body;
     //     console.log("Id is "+email);
     //     if(!email){
     //         return res.status(400).json({message: "User Email is required"});
     //     }
 
-    //     const user= await User.findOne(email).exec();
     //     if(!user){
     //         return res.status(404).json({message: "User not found"});
     //     }
