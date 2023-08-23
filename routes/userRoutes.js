@@ -24,16 +24,16 @@ router.route('/')
     .delete(userController.deleteUser) // /user
     
 
-router.route('/:userId/updateUser')
+router.route('/updateUser/:userId')
     .patch(userController.updateUser) // /user/:userId/update
 
-router.route('/:userId/updatePassword')
+router.route('/updatePassword/:userId')
     .patch(userController.updatePassword) // /user/:userId/updatePassword
 
-router.route("/:userId/:content")
-    .get(contentController.getUserContent) // /user/:userId/content
+// router.route("/:userId/:content")
+//     .get(contentController.getUserContent) // /user/:userId/content
 
-router.route('/profile')            // /user/profile
+router.route('/profile/:userId')            // /user/profile
     .get(userController.getUser)
 
 

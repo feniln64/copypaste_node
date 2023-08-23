@@ -7,12 +7,16 @@ const roles=require('../config/roles');// roles[0]== admin, roles[1]==moderator,
 
 // router.use(verifyJWT);
 
-router.route('/create') 
+router.route('/create/:userId') // /subdomain/create/:userId
     .post(subdomainController.createNewSubdomain)
-router.route('/getall')
+
+router.route('/getall')  // /subdomain/getall
     .get(subdomainController.getAllSubdomain)
 
-router.route('/:userId')
+router.route('/getsubdomain/:userId')  // /subdomain/getsubdomain/:userId
     .get(subdomainController.getSubdomainByUserId)
+
+router.route('/update/:userId')  // /subdomain/update/:userId
+    .post(subdomainController.updateDomain)
 
 module.exports = router;

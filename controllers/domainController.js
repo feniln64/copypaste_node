@@ -31,8 +31,9 @@ const getAllSubdomain = asyncHandler(async (req, res) => {
 // @route   POST /subdomain/create
 // @access  Private
 const createNewSubdomain = asyncHandler(async (req, res) => {
-  const { subdomain ,userId,active} = req.body;
-  console.log("createNewSubdomain called");
+  const { subdomain,active} = req.body;
+  const userId = req.params.userId;
+  console.log("create NewSubdomain called");
   console.log("subdomain =", subdomain);
   console.log("userId =", userId);
   console.log("active =", active);
@@ -53,7 +54,7 @@ const createNewSubdomain = asyncHandler(async (req, res) => {
   const payload ={
     "content": "@",
     "name": subdomain,
-    "proxied": false,
+    "proxied": true,
     "type": "CNAME",
     "comment": "CNAME for readyle.live react app",
   }
@@ -98,34 +99,84 @@ const createNewSubdomain = asyncHandler(async (req, res) => {
 // @route   POST /subdoamin
 // @access  Private || private means require token
 const updateDomain = asyncHandler(async (req, res) => {
-  const { userId, newDomain } = req.body;
+  const { newDomain, premium_user } = req.body;
   // console.log(email,name,roles,active,premium_user);
-  console.log(req.body.id);
-  if (!userId || !newDomain) {
-    return res.status(400).json({ message: "Userid and New domain required.." });
+  const userId = req.params.userId;
+  console.log("updateDomain called");
+  if ( !newDomain || typeof premium_user !== "boolean") {
+    return res.status(400).json({ message: "Userid and New domain and premium user required.." });
   }
 
-  const newSubDomain = await Subdomain.findOne({ userId: userId }).exec();
+  if (premium_user !== true) {
+    return res.status(400).json({ message: "only premium user can update domain" });
+  }
+
+  const newSubDomain = await Subdomain.findOne({ userId }).exec();
+  console.log("newSubDomain =", newSubDomain);
   if (!newSubDomain) {
     return res.status(404).json({ message: "User not found" });
   }
 
   const duplicate = await Subdomain.findOne({ subdomain: newDomain }).lean().exec();
-  console.log("duplicate is =" + duplicate.subdomain);
+  console.log("duplicate is =" + duplicate);
   // if (duplicate && duplicate.email.toString() === email) {
-  //     return res.status(409).json({message: "This email is already exists with another account"});
+    //     return res.status(409).json({message: "This email is already exists with another account"});
+    // }
+    
+    if (duplicate) {
+      return res.status(409).json({ message: "This domain is already exists with another user" });
+    }
+    
+    const subdomain_id=newSubDomain.dns_record_id;
+    console.log("subdomain_id =", subdomain_id);
+   
+    const payload ={
+      "content": "@",
+      "name": newDomain,
+      "proxied": true,
+      "type": "CNAME",
+      "comment": "CNAME for readyle.live react app",
+    }
+    try {
+    cf.patch(`zones/ac2a7392c9f304dea26c229e08f8efc5/dns_records/${subdomain_id}`, payload)
+      .then((response) => {
+
+        newSubDomain.subdomain = newDomain;
+        const updateSubDomain =  newSubDomain.save();
+        if (!updateSubDomain) {
+          return res.status(500).json({ message: "Something went wrong during updating subdoamin" });
+        }
+
+        return res.status(201).json(
+          {
+            message: `subdomain ${newDomain} updated successfully`,
+            subdomainObject: newSubDomain
+          });
+        // return record_id
+      })
+      .catch((error) => {
+        console.log(error);
+        return res.status(409).json({ message: "error in function" });
+        
+      });
+  }
+  catch (error) {
+    if (error.response) {
+      console.log(error.response);
+      alert(error.response.data.message);
+    } else if (error.request) {
+      console.log("network error");
+    } else {
+      console.log(error);
+    }
+  }
+  // newSubDomain.subdomain = newDomain;
+  // const updateSubDomain = await newSubDomain.save();
+  // if (!updateSubDomain) {
+  //   res.status(500).json({ message: "Something went wrong" });
+  // } else {
+  //   res.status(200).json({ message: ` updated successfully` });
   // }
-
-  if (duplicate) {
-    return res.status(409).json({ message: "This domain is already exists with another user" });
-  }
-
-  const updateSubDomain = await newSubDomain.save();
-  if (!updateSubDomain) {
-    res.status(500).json({ message: "Something went wrong" });
-  } else {
-    res.status(200).json({ message: ` updated successfully` });
-  }
 
 })
 
@@ -140,9 +191,21 @@ const getSubdomainByUserId = asyncHandler(async (req, res) => {
   return res.json(subdomains);
 })
 
+const deleteSubdomainByUserId = asyncHandler(async (req, res) => {
+  const  userId  = req.params;
+  console.log("getSubdomainByUserId called");
+  const subdomains = await Subdomain.find(userId).lean().exec();
+  console.log("subdomains =",subdomains);
+  if (!subdomains?.length) {
+    return res.status(404).json({ message: "No subdomains found" });
+  }
+  return res.json(subdomains);
+})
+
 module.exports = {
   getAllSubdomain,
   createNewSubdomain,
   updateDomain,
-  getSubdomainByUserId
+  getSubdomainByUserId,
+  deleteSubdomainByUserId
 }
