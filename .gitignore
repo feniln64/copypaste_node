@@ -4,3 +4,4 @@ reqLog.log\
 venv/
 .env
 .serverless/
+package-lock.json
