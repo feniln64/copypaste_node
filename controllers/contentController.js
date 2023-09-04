@@ -2,7 +2,7 @@ const Content = require('../models/model.content');
 const asyncHandler = require('express-async-handler');
 const { json } = require('body-parser');
 const sizeof = require('object-sizeof')
-
+const generateQR = require('../functions/generateQR');
 // @desc    Get all subdoamins
 // @route   GET /subdoamin
 // @access  Private

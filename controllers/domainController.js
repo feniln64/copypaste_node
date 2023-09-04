@@ -3,14 +3,17 @@ const Subdomain = require('../models/model.subdomain');
 const asyncHandler = require('express-async-handler');
 const { json } = require('body-parser');
 const { default: axios } = require('axios');
+const generateQR = require('../functions/generateQR');
 require('dotenv').config
 const cf = axios.create({
   baseURL: 'https://api.cloudflare.com/client/v4'
-},
-);
+});
 cf.defaults.headers.common["x-auth-key"] = "721d500a5a04d543e57d3a2c17e4bbe1036f2";
 cf.defaults.headers.common["X-Auth-Email"] = "fenilnakrani39@gmail.com";
 
+const cf_qr = axios.create({
+  baseURL: 'https://chart.googleapis.com'
+});
 
 
 
@@ -46,11 +49,11 @@ const createNewSubdomain = asyncHandler(async (req, res) => {
   }
  
   // check if subdomain already exists
-  const duplicate = await Subdomain.findOne({ subdomain }).lean().exec();
-  if (duplicate) {
-    return res.status(409).json({ message: "Subdomain already exists" });
-  }
-
+  // const duplicate = await Subdomain.findOne({ subdomain }).lean().exec();
+  // if (duplicate) {
+  //   return res.status(409).json({ message: "Subdomain already exists" });
+  // }
+  // var qr = await generateQR(subdomain,userId);
   const payload ={
     "content": "@",
     "name": subdomain,
@@ -59,40 +62,61 @@ const createNewSubdomain = asyncHandler(async (req, res) => {
     "comment": "CNAME for readyle.live react app",
   }
   try {
-    cf.post(`zones/ac2a7392c9f304dea26c229e08f8efc5/dns_records`, payload)
-      .then((response) => {
-        const dns_record_id=response.data.result.id
-        console.log("record id "+dns_record_id);
-        const subdomainObject = { userId, subdomain, active, dns_record_id };
-        const createSubdomain =  Subdomain.create(subdomainObject);
-        if (!createSubdomain) {
-          return res.status(500).json({ message: "Something went wrong" });
-        }
-
-        return res.status(201).json(
-          {
-            message: `subdomain ${subdomain} created successfully`,
-            subdomainObject: subdomainObject
-          });
-        // return record_id
-      })
-      .catch((error) => {
-        console.log(error);
-        return res.status(409).json({ message: "error in function" });
-        
-      });
-  }
-  catch (error) {
+    cf_qr.get(`/chart?cht=qr&chs=500x500&chl=${subdomain}.realyle.live&choe=UTF-8`)
+        .then((response) => {
+            console.log(response.data);
+            // Qr.create({userId,qr_code:response.config.url})
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
+catch (error) {
     if (error.response) {
-      console.log(error.response);
-      alert(error.response.data.message);
+        console.log(error.response);
+        alert(error.response.data.message);
     } else if (error.request) {
-      console.log("network error");
+        console.log("network error");
     } else {
-      console.log(error);
+        console.log(error);
     }
-  }
+}
 
+  // try {
+  //   cf.post(`zones/ac2a7392c9f304dea26c229e08f8efc5/dns_records`, payload)
+  //     .then((response) => {
+  //       const dns_record_id=response.data.result.id
+  //       console.log("record id "+dns_record_id);
+  //       const subdomainObject = { userId, subdomain, active, dns_record_id };
+  //       const createSubdomain =  Subdomain.create(subdomainObject);
+  //       if (!createSubdomain) {
+  //         return res.status(500).json({ message: "Something went wrong" });
+  //       }
+
+  //       return res.status(201).json(
+  //         {
+  //           message: `subdomain ${subdomain} created successfully`,
+  //           subdomainObject: subdomainObject
+  //         });
+  //       // return record_id
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //       return res.status(409).json({ message: "error in function" });
+        
+  //     });
+  // }
+  // catch (error) {
+  //   if (error.response) {
+  //     console.log(error.response);
+  //     alert(error.response.data.message);
+  //   } else if (error.request) {
+  //     console.log("network error");
+  //   } else {
+  //     console.log(error);
+  //   }
+  // }
+  return res.status(201).json({message:"subdomain created successfully"});
 })
 
 // @desc    update subdomain
@@ -185,8 +209,8 @@ const getSubdomainByUserId = asyncHandler(async (req, res) => {
   console.log("getSubdomainByUserId called");
   const subdomains = await Subdomain.find(userId).lean().exec();
   console.log("subdomains =",subdomains);
-  if (!subdomains?.length) {
-    return res.status(404).json({ message: "No subdomains found" });
+  if (subdomains.length===0) {
+    return res.status(204).json({ message: "No subdomains found" });
   }
   return res.json(subdomains);
 })
