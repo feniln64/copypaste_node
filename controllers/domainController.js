@@ -3,6 +3,25 @@ const Subdomain = require('../models/model.subdomain');
 const asyncHandler = require('express-async-handler');
 const { json } = require('body-parser');
 const { default: axios } = require('axios');
+var QRCode = require('qrcode')
+const multer = require("multer");
+const multerS3 = require("multer-s3");
+const { S3Client } = require("@aws-sdk/client-s3");
+require('dotenv').config();
+// create s3 instance using S3Client 
+// (this is how we create s3 instance in v3)
+const s3 = new S3Client({
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY, // store it in .env file to keep it safe
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    },
+    region: "us-east-1" // this is the region that you select in AWS account
+})
+
+
+
+var fs = require('fs');
+
 const generateQR = require('../functions/generateQR');
 require('dotenv').config
 const cf = axios.create({
@@ -11,9 +30,7 @@ const cf = axios.create({
 cf.defaults.headers.common["x-auth-key"] = "721d500a5a04d543e57d3a2c17e4bbe1036f2";
 cf.defaults.headers.common["X-Auth-Email"] = "fenilnakrani39@gmail.com";
 
-const cf_qr = axios.create({
-  baseURL: 'https://chart.googleapis.com'
-});
+
 
 
 
@@ -49,11 +66,10 @@ const createNewSubdomain = asyncHandler(async (req, res) => {
   }
  
   // check if subdomain already exists
-  // const duplicate = await Subdomain.findOne({ subdomain }).lean().exec();
+  const duplicate = await Subdomain.findOne({ subdomain }).lean().exec();
   // if (duplicate) {
   //   return res.status(409).json({ message: "Subdomain already exists" });
   // }
-  // var qr = await generateQR(subdomain,userId);
   const payload ={
     "content": "@",
     "name": subdomain,
@@ -61,29 +77,44 @@ const createNewSubdomain = asyncHandler(async (req, res) => {
     "type": "CNAME",
     "comment": "CNAME for readyle.live react app",
   }
-  try {
-    cf_qr.get(`/chart?cht=qr&chs=500x500&chl=${subdomain}.realyle.live&choe=UTF-8`)
-        .then((response) => {
-            console.log(response.data);
-            // Qr.create({userId,qr_code:response.config.url})
-        })
-        .catch((error) => {
-            console.log(error);
-        });
-}
-catch (error) {
-    if (error.response) {
-        console.log(error.response);
-        alert(error.response.data.message);
-    } else if (error.request) {
-        console.log("network error");
-    } else {
-        console.log(error);
+  var opts = {
+    errorCorrectionLevel: 'H',
+    type: 'image/png',
+    quality: 0.3,
+    margin: 1,
+    version: 9,
+    color: {
+      dark:"#000000",
+      light:"#ffffff"
     }
-}
+  }
+  // save qr code in local and upload to s3
 
+  QRCode.toFile('./QRS/file.png', `http://${subdomain}.cpypst.online`, opts, function(err) {
+    if (err) throw err;
+    console.log('QR code saved!');
+    const s3Storage = multerS3({
+      s3: s3, // s3 instance
+      bucket: process.env.AWS_BUCKET_NAME, // change it as per your project requirement
+      acl: "public-read", // storage access type
+      metadata: (req, file, cb) => {
+          cb(null, {fieldname: file.fieldname})
+      },
+      key: (req, file, cb) => {
+          const fileName = Date.now() + "_" + file.fieldname + "_" + file.originalname;
+          cb(null, fileName);
+      }
+  });
+ 
+
+    
+  return res.status(201).json({ message: "subdomain created successfully" });
+
+  });
+
+  // creating subdomain in cloudflare
   // try {
-  //   cf.post(`zones/ac2a7392c9f304dea26c229e08f8efc5/dns_records`, payload)
+  //   cf.post(`zones/${process.env.CLOUDFLARE_ZONE_ID}/dns_records`, payload)
   //     .then((response) => {
   //       const dns_record_id=response.data.result.id
   //       console.log("record id "+dns_record_id);
@@ -116,7 +147,7 @@ catch (error) {
   //     console.log(error);
   //   }
   // }
-  return res.status(201).json({message:"subdomain created successfully"});
+ 
 })
 
 // @desc    update subdomain
