@@ -8,16 +8,7 @@ const contentController = require('../controllers/contentController');
 
 
 // router.use(verifyJWT);
-// admin routes
-/**
- * @swagger
- * /user:
- *   post:
- *     description: Use to create new user
- *     responses:
- *       200:
- *         description: A successful response
- */
+
 router.route('/')
     .get(userController.getAllUsers) // /user
     .post(userController.createNewUser) // /user

@@ -1,0 +1,55 @@
+{
+    "apple": {
+      "apn": {
+        "keyId": "NHHRUF4YF7"
+      },
+      "baseIdentifier": "pass.com.scanbuy.walletpass",
+      "teamIdentifier": "29A4NTD7PX",
+      "webServiceURL": " https://devpassapi.scanbuy.com"
+    },
+    "scanbuy": {
+      "cdn": {
+        "bucket": "dev-scanbuy-wallet",
+        "url": "https://cdn.scanbuy.com"
+      },
+      "secret": "some-secret",
+      "zeus": {
+        "authType": "Scanbuy",
+        "token": "wallet1234"
+      }
+    },
+    "context": {
+      "environment": "prod"
+    },
+    "dynamodb": {
+      "devices": {
+        "tableName": "dev-walletpass-devices"
+      },
+      "passes": {
+        "tableName": "dev-walletpass-passes"
+      },
+      "registration": {
+        "tableName": "dev-walletpass-registration"
+      },
+      "certificate": {
+        "tableName": "dev-walletpass-passes",
+        "id": "id-where-certificate-inserted"
+      },
+      "batchWriteSize":"25"
+    },
+    "google": {
+      "baseUrl": "https://walletobjects.googleapis.com/walletobjects/v1",
+      "issuerId": "3388000000022204848",
+      "webServiceURL": "https://devpassapi.scanbuy.com/v1/devices/registrations"
+    },
+    "s3": {
+      "bucket": "dev-scanbuy-wallet",
+      "connection": {
+        "region": "us-east-2"
+      }
+    },
+    "eventBus": {
+      "eventBusName": "dev-scanbuy-wallet-bridge",
+      "source": "scanbuy.walletpass"
+    }
+  }
