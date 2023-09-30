@@ -11,9 +11,10 @@ const contentController = require('../controllers/contentController');
 
 router.route('/')
     .get(userController.getAllUsers) // /user
-    .post(userController.createNewUser) // /user
     .delete(userController.deleteUser) // /user
     
+router.route('/createuser')
+    .post(userController.createNewUser) // /user
 
 router.route('/updateUser/:userId')
     .patch(userController.updateUser) // /user/:userId/update

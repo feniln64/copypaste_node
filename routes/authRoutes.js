@@ -7,8 +7,6 @@ const getIP = require('../middleware/getIP');
 const verifyJWT = require('../middleware/verifyJWT');
 
 
-router.route('/signup') // /auth/signup
-    .post(getIP,userController.signupUser)
 
 router.route('/login') //      /auth/login
     .post(getIP,loginLimiter, authController.login)

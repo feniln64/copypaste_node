@@ -481,42 +481,7 @@ const getUser = asyncHandler(async (req, res) => {
 })
 
 
-// @desc    delete user
-// @route   POST /users
-// @access  Public // no JWT required for signup as this is used for normal user 
-//sighup and not for admin
-const signupUser = asyncHandler(async (req, res) => {
-    const { email, name, password } = req.body;
-    const roles = ["user"];
-    // check data
-    console.log(email, name, password);
-    if (!email || !name || !password) {
-        return res.status(400).json({ message: "Please enter all fields" });
-    }
-    // return res.status(201).json({message: `${name} created successfully`});
 
-    // check if user already exists
-    const duplicate = await User.findOne({ email }).lean().exec();
-    if (duplicate) {
-        return res.status(409).json({ message: "User already exists" });
-    }
-
-    // hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const userObject = { email, name, "password": hashedPassword, roles };
-
-    // create user
-    const user = await User.create(userObject);
-    if (!user) {
-        console.log("user not created")
-        res.status(500).json({ message: "Something went wrong" });
-    } else {
-        console.log("Normal User is created");
-        res.status(201).json({ message: `${user} created successfully` });
-        // res.status(201).json({message: "User created successfully"});
-    }
-})
 
 
 module.exports = {
@@ -525,6 +490,5 @@ module.exports = {
     updateUser,
     deleteUser,
     getUser,
-    signupUser,
     updatePassword
 }
