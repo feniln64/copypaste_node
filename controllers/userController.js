@@ -346,10 +346,7 @@ const createNewUser = asyncHandler(async (req, res) => {
             .catch((err) => {
                 console.log(err.statusCode)
             })
-        
-        // console.log("Admin is created");
         res.status(201).json({ message: `${user} created successfully` });
-        // res.status(201).json({message: "User created successfully"});
     }
 })
 

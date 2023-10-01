@@ -91,7 +91,7 @@ const createNewSubdomain = asyncHandler(async (req, res) => {
     const image_name = Date.now() + "-" + Math.floor(Math.random() * 1000);
     const params = {
       Bucket: S3_BUCKET,
-      Key: `${userId}/${subdomain}/${image_name}.png`, // type is not required
+      Key: `${subdomain}/${image_name}.png`, // type is not required
       Body: buf,
       ContentEncoding: 'base64', // required
       ContentType: `image/png` // required. Notice the back ticks
