@@ -29,7 +29,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
 
 const createNewUser = asyncHandler(async (req, res) => {
     const { email, username, name, password } = req.body;
-    const roles = ["admin"];
+    // const roles = ["admin"];
     // check data
     console.log(email, username, name, password);
     if (!email || !username || !name || !password) {
