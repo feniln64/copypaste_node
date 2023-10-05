@@ -137,9 +137,28 @@ const logout =  (req,res) => {
       
 
 }
+const varifyEmail =  (req,res) => {
+    const token = req.params.token
+    console.log("varify email called")
+    jwt.verify(
+        token,
+        process.env.ACCESS_TOKEN_SECRET, 
+        (err, decoded) => {
+            if(err) {
+                console.log('Forbidden! Access token expired');
+            return res.status(403).send('Forbidden! Access token expired');
+            }
+            if (decoded){
+                return res.status(200).json({message:'Email varified'})
+            }
+    })
+
+    res.status(200).json({message:'Logout successfull'})
+}
 
 module.exports={
     login,
     refresh,
-    logout
+    logout,
+    varifyEmail
 }
