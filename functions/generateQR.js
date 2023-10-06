@@ -1,34 +1,41 @@
-const { default: axios } = require('axios');
-const Qr = require('../models/model.qr');
+const AWS = require('aws-sdk');
+const fs = require('fs');
+const QRCode = require('qrcode')
+require('dotenv').config();
+// create s3 instance using S3Client
+// (this is how we create s3 instance in v3)
+const s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY, // store it in .env file to keep it safe
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 
-const cf = axios.create({
-    baseURL: 'https://chart.googleapis.com'
-});
-
-const generateQR = (subdomain,userId) => {
-    console.log("generateQR called");
+})
+var S3_BUCKET = process.env.AWS_BUCKET_NAME;
+const upload_to_s3 = (userId, subdomain) => {
     try {
-        cf.get(`/chart?cht=qr&chs=500x500&chl=${subdomain}.realyle.live&choe=UTF-8`)
-            .then((response) => {
-                console.log(response.data);
-                return response.data;
-                // Qr.create({userId,qr_code:response.config.url})
-            })
-            .catch((error) => {
-                console.log(error);
+        QRCode.toDataURL(`http://${subdomain}.cpypst.online`, function (err, qrcode) { // qrcode is response base64 encoded data (QR code)
+            var buf = Buffer.from(qrcode.replace(/^data:image\/\w+;base64,/, ""), 'base64')
+            const image_name = Date.now() + "-" + Math.floor(Math.random() * 1000);
+            const params = {
+                Bucket: S3_BUCKET,
+                Key: `${userId}/${subdomain}/${image_name}.png`, // type is not required
+                Body: buf,
+                ContentEncoding: 'base64', // required
+                ContentType: `image/png` // required. Notice the back ticks
+            }
+            s3.upload(params, function (err, data) {
+
+                if (err) {
+                    console.log('ERROR MSG: ', err);
+                } else {
+                    console.log('Successfully uploaded data');
+                }
             });
+        });
     }
-    catch (error) {
-        if (error.response) {
-            console.log(error.response);
-            alert(error.response.data.message);
-        } else if (error.request) {
-            console.log("network error");
-        } else {
-            console.log(error);
-        }
+    catch (err) {
+        console.log(err);
     }
 
 }
 
-module.exports = generateQR;
+module.exports = upload_to_s3;
