@@ -9,53 +9,51 @@ require('dotenv').config()
 // @route   POST /users
 // @access  Private
 const signupUser = asyncHandler(async (req, res) => {
-    const { email, username, name, password } = req.body;
-    // const roles = ["admin"];
-    // check data
-    console.log(email, username, name, password);
-    if (!email || !username || !name || !password) {
-        return res.status(400).json({ message: "Please enter all fields" });
-    }
+  const { email, username, name, password } = req.body;
+  if (!email || !username || !name || !password) {
+    return res.status(400).json({ message: "Please enter all fields" });
+  }
 
-    // check if user already exists
-    const duplicate_email = await User.findOne({ email }).lean().exec();
-    if (duplicate_email) {
-        return res.status(409).json({ message: "Email is taken" });
-    }
+  // check if user already exists
+  const duplicate_email = await User.findOne({ email }).lean().exec();
+  if (duplicate_email) {
+    return res.status(409).json({ message: "Email is taken" });
+  }
 
-    const duplicate_username = await User.findOne({ username }).lean().exec();
-    if (duplicate_username) {
-        return res.status(409).json({ message: "Username is already taken" });
-    }
+  const duplicate_username = await User.findOne({ username }).lean().exec();
+  if (duplicate_username) {
+    return res.status(409).json({ message: "Username is already taken" });
+  }
 
-    // hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+  // hash password
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-    const userObject = { email, username, name, "password": hashedPassword, roles };
-    console.log("userObject created");
-    // create user
-    const user = await User.create(userObject);
-    if (!user) {
-        res.status(500).json({ message: "Something went wrong" });
-    } else {
-        const request = mailjet
-            .post("send", { 'version': 'v3.1' })
-            .request({
-                "Messages": [
-                    {
-                        "From": {
-                            "Email": "account@cpypst.online",
-                            "Name": "DoCopyPaste"
-                        },
-                        "To": [
-                            {
-                                "Email": email,
-                                "Name": name
-                            }
-                        ],
-                        "Subject": "Your email flight plan!",
-                        "TextPart": "Dear passenger 1, welcome to Mailjet! May the delivery force be with you!",
-                        "HTMLPart": `<!DOCTYPE html>
+  const userObject = { email, username, name, "password": hashedPassword, roles };
+
+  // create user
+  const user = await User.create(userObject);
+  if (!user) {
+    res.status(500).json({ message: "Something went wrong" });
+  }
+  else {
+    const request = mailjet
+      .post("send", { 'version': 'v3.1' })
+      .request({
+        "Messages": [
+          {
+            "From": {
+              "Email": "account@cpypst.online",
+              "Name": "DoCopyPaste"
+            },
+            "To": [
+              {
+                "Email": email,
+                "Name": name
+              }
+            ],
+            "Subject": "Your email flight plan!",
+            "TextPart": "Dear passenger 1, welcome to Mailjet! May the delivery force be with you!",
+            "HTMLPart": `<!DOCTYPE html>
                     <html>
                     <head>
                     
@@ -317,87 +315,85 @@ const signupUser = asyncHandler(async (req, res) => {
                     
                     </body>
                     </html>`
-                    }
-                ]
-            })
-        await request
-            .then((result) => {
-                console.log("Email sent successfully")
-            })
-            .catch((err) => {
-                console.log(err.statusCode)
-            })
-        res.status(201).json({ message: `${user} created successfully` });
-    }
+          }
+        ]
+      })
+    await request
+      .then((result) => {
+        console.log("Email sent successfully")
+      })
+      .catch((err) => {
+        console.log(err.statusCode)
+      })
+    res.status(201).json({ message: `${user} created successfully` });
+  }
 });
-
-
 
 //@desc Login
 //@route POST /auth/login
 //@access public
 const login = asyncHandler(async (req, res) => {
 
-    const { email, password } = req.body;
-    if (!email || !password) {
-        res.status(400).json({ message: 'Please provide email and password both' });
-    }
+  const { email, password } = req.body;
+  if (!email || !password) {
+    res.status(400).json({ message: 'Please provide email and password both' });
+  }
 
-    const foundUser = await User.findOne({ email });
+  const foundUser = await User.findOne({ email });
 
-    if (!foundUser || !foundUser.active) {
-        res.status(401).json({ message: 'Invalid credentials' });
-    }
+  if (!foundUser || !foundUser.active) {
+    res.status(401).json({ message: 'Invalid credentials' });
+  }
 
-    const isMatch = await foundUser.comparePassword(password);
+  const isMatch = await foundUser.comparePassword(password);
 
-    if (!isMatch) {
-        return res.status(401).json({ message: 'Invalid credentials' });
-    }
+  if (!isMatch) {
+    return res.status(401).json({ message: 'Invalid credentials' });
+  }
 
-    const accessToken = jwt.sign(
-        {
-            "UserInfo": {
-                "id": String(foundUser._id),
-                "username": foundUser.name,
-                "email": foundUser.email,
-                "premium_user": foundUser.premium_user,
-            },
-        },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '1h' }
-    )
+  const accessToken = jwt.sign(
+    {
+      "UserInfo": {
+        "id": String(foundUser._id),
+        "username": foundUser.name,
+        "email": foundUser.email,
+        "premium_user": foundUser.premium_user,
+      },
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: '1h' }
+  )
 
-    const userInfo = {
+  const userInfo = {
+    "id": String(foundUser._id),
+    "username": foundUser.name,
+    "email": foundUser.email,
+    "premium_user": foundUser.premium_user
+  }
+
+  const refreshToken = jwt.sign(
+    {
+      "UserInfo": {
         "id": String(foundUser._id),
         "username": foundUser.name,
         "email": foundUser.email,
         "premium_user": foundUser.premium_user
-    }
+      }
+    },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: '1d' }
 
-    const refreshToken = jwt.sign(
-        {
-            "UserInfo": {
-                "id": String(foundUser._id),
-                "username": foundUser.name,
-                "email": foundUser.email,
-                "premium_user": foundUser.premium_user
-            }
-        },
-        process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '1d' }
+  )
 
-    )
+  //create cookie wih refresh token
+  res.cookie('jwt', refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'None',
+    maxAge: 24 * 60 * 60 * 1000 //1d
+  })
 
-    //create cookie wih refresh token
-    res.cookie('jwt', refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'None',
-        maxAge: 24 * 60 * 60 * 1000 //1d
-    })
-
-    res.status(200).json({ accessToken, userInfo });
+  res.status(200).json({ accessToken, userInfo });
 });
 
 //@desc Refresh token
@@ -405,44 +401,44 @@ const login = asyncHandler(async (req, res) => {
 //@access public
 const refresh = (req, res) => {
 
-    const cookies = req.cookies;
+  const cookies = req.cookies;
 
-    if (!cookies?.jwt) {
-        return res.status(401).json({ message: 'Unauthenticated' })
+  if (!cookies?.jwt) {
+    return res.status(401).json({ message: 'Unauthenticated' })
+  }
+  const refreshToken = cookies.jwt;
+  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, asyncHandler(async (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: 'Unauthenticated' })
     }
-    const refreshToken = cookies.jwt;
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, asyncHandler(async (err, decoded) => {
-        if (err) {
-            return res.status(401).json({ message: 'Unauthenticated' })
+
+    const foundUser = await User.findOne({ email: decoded.UserInfo.email });
+
+    if (!foundUser) {
+      return res.status(401).json({ message: 'Unauthenticated' });
+    }
+
+    const userInfo = {
+      "id": String(foundUser._id),
+      "username": foundUser.name,
+      "email": foundUser.email,
+      "premium_user": foundUser.premium_user
+    }
+
+    const accessToken = jwt.sign(
+      {
+        "UserInfo": {
+          "id": String(foundUser._id),
+          "username": foundUser.name,
+          "email": foundUser.email,
+          "premium_user": foundUser.premium_user,
         }
-
-        const foundUser = await User.findOne({ email: decoded.UserInfo.email });
-
-        if (!foundUser) {
-            return res.status(401).json({ message: 'Unauthenticated' });
-        }
-
-        const userInfo = {
-            "id": String(foundUser._id),
-            "username": foundUser.name,
-            "email": foundUser.email,
-            "premium_user": foundUser.premium_user
-        }
-
-        const accessToken = jwt.sign(
-            {
-                "UserInfo": {
-                    "id": String(foundUser._id),
-                    "username": foundUser.name,
-                    "email": foundUser.email,
-                    "premium_user": foundUser.premium_user,
-                }
-            },
-            process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: '1h' }
-        )
-        res.status(200).json({ accessToken, userInfo })
-    }));
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: '1h' }
+    )
+    res.status(200).json({ accessToken, userInfo })
+  }));
 }
 
 //@desc Logout
@@ -450,16 +446,16 @@ const refresh = (req, res) => {
 //@access public
 const logout = (req, res) => {
 
-    const cookies = req.cookies
-    if (!cookies?.jwt) {
-        return res.status(204).json({ message: 'Unauthenticated' })
-    }
-    res.clearCookie('jwt', {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'None',
-    });
-    res.status(200).json({ message: 'Logout Successfully' });
+  const cookies = req.cookies
+  if (!cookies?.jwt) {
+    return res.status(204).json({ message: 'Unauthenticated' })
+  }
+  res.clearCookie('jwt', {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'None',
+  });
+  res.status(200).json({ message: 'Logout Successfully' });
 }
 
 //@desc Forgot Password
@@ -467,23 +463,23 @@ const logout = (req, res) => {
 //@access public
 const forgotPassword = asyncHandler(async (req, res) => {
 
-    const { email } = req.body;
-    if (!email) {
-        res.status(400).json({ message: 'Please enter email' });
-    }
+  const { email } = req.body;
+  if (!email) {
+    res.status(400).json({ message: 'Please enter email' });
+  }
 
-    const foundUser = await User.findOne({ email });
+  const foundUser = await User.findOne({ email });
 
-    if (!foundUser || !foundUser.active) {
-        res.status(401).json({ message: 'Invalid credentials' });
-    }
+  if (!foundUser || !foundUser.active) {
+    res.status(401).json({ message: 'Invalid credentials' });
+  }
 
-    const resetToken = foundUser.getResetPasswordToken();
-    await foundUser.save();
+  const resetToken = foundUser.getResetPasswordToken();
+  await foundUser.save();
 
-    const requestUrl = `${req.protocol}://${req.get('host')}/resetPassword/${resetToken}`;
+  const requestUrl = `${req.protocol}://${req.get('host')}/resetPassword/${resetToken}`;
 
-    res.status(200).json({message: 'OK', requestUrl : requestUrl});
+  res.status(200).json({ message: 'OK', requestUrl: requestUrl });
 });
 
 //@desc Reset Password
@@ -491,28 +487,28 @@ const forgotPassword = asyncHandler(async (req, res) => {
 //@access public
 const resetPassword = asyncHandler(async (req, res) => {
 
-    const resetPasswordToken = crypto.createHash('sha256').update(req.params.resetPasswordToken).digest('hex');
+  const resetPasswordToken = crypto.createHash('sha256').update(req.params.resetPasswordToken).digest('hex');
 
-    const user = await User.findOne({resetPasswordToken, resetPasswordExpire: {$gt: Date.now()}});
+  const user = await User.findOne({ resetPasswordToken, resetPasswordExpire: { $gt: Date.now() } });
 
-    if(!user){
-        res.status(401).json({ message: 'Invalid token' });
-    }
+  if (!user) {
+    res.status(401).json({ message: 'Invalid token' });
+  }
 
-    user.password = req.body.password;
-    user.resetPasswordExpire = undefined;
-    user.resetPasswordToken = undefined;
+  user.password = req.body.password;
+  user.resetPasswordExpire = undefined;
+  user.resetPasswordToken = undefined;
 
-    await user.save();
+  await user.save();
 
-    res.status(200).json({message: 'Password reset successfully!!'});
+  res.status(200).json({ message: 'Password reset successfully!!' });
 });
 
 module.exports = {
-    signupUser,
-    login,
-    refresh,
-    logout,
-    forgotPassword,
-    resetPassword
+  signupUser,
+  login,
+  refresh,
+  logout,
+  forgotPassword,
+  resetPassword
 }

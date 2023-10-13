@@ -3,7 +3,6 @@ const router = express.Router();
 const {signupUser, login, refresh, logout, forgotPassword, resetPassword} = require('../controllers/authController');
 const loginLimiter = require('../middleware/loginLimiter');
 const getIP = require('../middleware/getIP');
-const verifyJWT = require('../middleware/verifyJWT');
 
 router.route('/sign-up').post(getIP, signupUser);
 router.route('/sign-in').post(getIP, loginLimiter, login);

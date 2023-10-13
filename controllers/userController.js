@@ -1,8 +1,7 @@
 const User = require('../models/model.user');
-const Content = require('../models/model.content');
 const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcryptjs');
-const { json } = require('body-parser');
+require('body-parser');
 
 // @desc    Get all users
 // @route   GET /users
@@ -10,6 +9,7 @@ const { json } = require('body-parser');
 const getAllUsers = asyncHandler(async (req, res) => {
 
     const users = await User.find().select('-password').lean();
+
     if (!users?.length) {
         return res.status(404).json({ message: "No users found" });
     }
@@ -20,6 +20,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
 // @route   POST /user/:userId/update
 // @access  Private
 const updateUser = asyncHandler(async (req, res) => {
+
     const { email, name, username } = req.body;
 
     if (!email || !name, !username) {
@@ -48,18 +49,18 @@ const updateUser = asyncHandler(async (req, res) => {
     const updateUser = await user.save();
     if (!updateUser) {
         res.status(500).json({ message: "Something went wrong" });
-    } else {
+    }
+    else {
         res.status(200).json({ message: `${name} updated successfully}` });
     }
-
 });
 
 // @desc    update Password
 // @route   POST /user/:userId/updatePassword
 // @access  Private
 const updatePassword = asyncHandler(async (req, res) => {
-    const { password } = req.body;
 
+    const { password } = req.body;
     if (!password) {
         return res.status(400).json({ message: "Password is required" });
     }
@@ -77,7 +78,8 @@ const updatePassword = asyncHandler(async (req, res) => {
     const updateUser = await user.save();
     if (!updateUser) {
         res.status(500).json({ message: "Something went wrong" });
-    } else {
+    }
+    else {
         res.status(200).json({ message: `Password updated successfully}` });
     }
 });
@@ -86,6 +88,7 @@ const updatePassword = asyncHandler(async (req, res) => {
 // @route   POST /users
 // @access  Private
 const deleteUser = asyncHandler(async (req, res) => {
+
     const userId = req.params.userId;
     if (!userId) {
         return res.status(400).json({ message: "User ID is required" });
@@ -99,79 +102,19 @@ const deleteUser = asyncHandler(async (req, res) => {
     const deleteUser = await user.deleteOne();
     if (!deleteUser) {
         res.status(500).json({ message: "Something went wrong" });
-    } else {
+    }
+    else {
         res.status(200).json({ message: `${user.name} deleted successfully}` });
     }
 });
 
 const getUser = asyncHandler(async (req, res) => {
+
     const userId = req.params.userId;
-    // const email = req.query.email; // domaim.com/uri?email=xyz&name=abc
-    console.log(userId);
-    console.log("get user profile by ID called");
-    // const token = req.cookies.jwt;
-    // jwt.verify(token, process.env.REFRESH_TOKEN_SECRET, async (err, decodedToken) => {
-    //     if (err) {
-    //         console.log(err.message);
-    //         res.locals.user = null;
-    //         res.status(401).json({message: "Unauthorized"});
-    //     } else {
-    //         console.log(decodedToken);
-    //     }});
-    const user= await User.findOne({userId}).lean().exec();
-    console.log(user);
+    const user = await User.findOne({ userId }).lean().exec();
+
     return res.status(200).json({ message: user });
-    // const {email}=req.body;
-    //     console.log("Id is "+email);
-    //     if(!email){
-    //         return res.status(400).json({message: "User Email is required"});
-    //     }
-
-    //     if(!user){
-    //         return res.status(404).json({message: "User not found"});
-    //     }
-
-    //     res.status(200).json({user});
-})
-
-
-// @desc    delete user
-// @route   POST /users
-// @access  Public // no JWT required for signup as this is used for normal user 
-//sighup and not for admin
-const signupUser = asyncHandler(async (req, res) => {
-    const { email, name, password } = req.body;
-    const roles = ["user"];
-    // check data
-    console.log(email, name, password);
-    if (!email || !name || !password) {
-        return res.status(400).json({ message: "Please enter all fields" });
-    }
-    // return res.status(201).json({message: `${name} created successfully`});
-
-    // check if user already exists
-    const duplicate = await User.findOne({ email }).lean().exec();
-    if (duplicate) {
-        return res.status(409).json({ message: "User already exists" });
-    }
-
-    // hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const userObject = { email, name, "password": hashedPassword, roles };
-
-    // create user
-    const user = await User.create(userObject);
-    if (!user) {
-        console.log("user not created")
-        res.status(500).json({ message: "Something went wrong" });
-    } else {
-        console.log("Normal User is created");
-        res.status(201).json({ message: `${user} created successfully` });
-        // res.status(201).json({message: "User created successfully"});
-    }
-})
-
+});
 
 module.exports = {
     getAllUsers,

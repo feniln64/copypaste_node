@@ -1,15 +1,14 @@
 const AWS = require('aws-sdk');
-const fs = require('fs');
-const QRCode = require('qrcode')
+const QRCode = require('qrcode');
 require('dotenv').config();
-// create s3 instance using S3Client
-// (this is how we create s3 instance in v3)
+
 const s3 = new AWS.S3({
     accessKeyId: process.env.AWS_ACCESS_KEY, // store it in .env file to keep it safe
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
 
-})
 var S3_BUCKET = process.env.AWS_BUCKET_NAME;
+
 const upload_to_s3 = (userId, subdomain) => {
     try {
         QRCode.toDataURL(`http://${subdomain}.cpypst.online`, function (err, qrcode) { // qrcode is response base64 encoded data (QR code)
@@ -21,12 +20,12 @@ const upload_to_s3 = (userId, subdomain) => {
                 Body: buf,
                 ContentEncoding: 'base64', // required
                 ContentType: `image/png` // required. Notice the back ticks
-            }
-            s3.upload(params, function (err, data) {
-
+            };
+            s3.upload(params, function (err) {
                 if (err) {
                     console.log('ERROR MSG: ', err);
-                } else {
+                }
+                else {
                     console.log('Successfully uploaded data');
                 }
             });
