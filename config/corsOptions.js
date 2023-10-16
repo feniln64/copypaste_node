@@ -1,13 +1,10 @@
-
-const allowedOrigins=[
+const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
   'http://new.localhost:30001',
   'http://new.localhost:3000',
   'http://new.test.localhost:3000',
-
   'http://test.localhost:3000',
-
   'https://localhost:4100',
   'https://new.localhost:4100',
   'http://vscode.readyle.live:3000',
@@ -17,6 +14,7 @@ const allowedOrigins=[
 ]
 
 const re = new RegExp("(^|^[^:]+:\/\/|[^\.]+\.)readyle\.live");
+
 const corsOptions = {
   origin: allowedOrigins,
   optionsSuccessStatus: 200,

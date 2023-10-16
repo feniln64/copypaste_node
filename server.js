@@ -1,17 +1,18 @@
-const express = require('express')
+const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const corsOptions = require('./config/corsOptions')
-const dbConnection = require('./config/dbConnection')
-const userRoutes = require('./routes/userRoutes')
-const authRoutes = require('./routes/authRoutes')
-const subdomainRoute = require('./routes/subdomainRoute')
-const initRoutes = require('./routes/initRoutes')
-const contentRoutes = require('./routes/contentRoutes')
+const corsOptions = require('./config/corsOptions');
+const dbConnection = require('./config/dbConnection');
+const userRoutes = require('./routes/userRoutes');
+const authRoutes = require('./routes/authRoutes');
+const subdomainRoute = require('./routes/subdomainRoute');
+const initRoutes = require('./routes/initRoutes');
+const contentRoutes = require('./routes/contentRoutes');
 const mongoose = require('mongoose');
 const serverless = require('serverless-http');
 const PORT = process.env.PORT || 9000;
-const app = express()
+const app = express();
+
 require('dotenv').config
 
 app.use(cors(corsOptions))
