@@ -1,36 +1,8 @@
-service: copypast_node_Api
-provider:
-  name: aws
-  runtime: nodejs18.x
-  region: ${opt:region,'us-east-2'}
-  stage: ${opt:stage, 'dev'}
-  memorySize: 128
-  deploymentBucket:
-    name: sls-deployment-cpypst
-    blockPublicAccess: true
-
-custom:
-  region: ${opt:region,'us-east-2'}
-  stage: ${opt:stage, 'dev'}
-  prune:
-    automatic: true
-    number: 3 
-  stages:
-    # - local
-    - dev
-    - prod
-plugins:
-  - serverless-ignore
-
-functions:
-  app:
-    handler: server.handler
-    events: 
-      - http: 
-          path: /
-          method: ANY
-          cors: true
-      - http: 
-          path: /{proxy+}
-          method: ANY
-          cors: true
+version: '3'
+services:
+  react:
+    build: .
+    container_name: react_copypaste
+    restart: unless-stopped
+    ports:
+      - 80:80

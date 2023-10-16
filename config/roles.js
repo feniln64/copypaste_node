@@ -1,2 +1,2 @@
-const ROLES_LIST = ['admin', 'moderator','user']
+const ROLES_LIST = ['admin', 'moderator', 'user']
 module.exports = ROLES_LIST;
