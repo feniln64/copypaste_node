@@ -8,6 +8,8 @@ const authRoutes = require('./routes/authRoutes');
 const subdomainRoute = require('./routes/subdomainRoute');
 const initRoutes = require('./routes/initRoutes');
 const contentRoutes = require('./routes/contentRoutes');
+const permissionRoutes = require('./routes/permissionRoutes');
+
 const mongoose = require('mongoose');
 const serverless = require('serverless-http');
 const PORT = process.env.PORT || 9000;
@@ -26,6 +28,7 @@ app.use('/auth', authRoutes);
 app.use('/subdomain', subdomainRoute);
 app.use('/init', initRoutes);
 app.use('/content', contentRoutes);
+app.use('/permission', permissionRoutes);
 
 mongoose.connection.once('open', () => {
     console.log("MongoDB connection established successfully");

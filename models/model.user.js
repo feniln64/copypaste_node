@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const crypto = require("crypto");
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcrypt')
 
 const userSchema = new mongoose.Schema(
     {
@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
         },
         active: {
             type: Boolean,
-            default: true
+            default: false
         },
         premium_user: {
             type: Boolean,
