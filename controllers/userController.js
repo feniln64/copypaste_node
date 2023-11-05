@@ -7,9 +7,7 @@ require('body-parser');
 // @route   GET /users
 // @access  Private
 const getAllUsers = asyncHandler(async (req, res) => {
-
     const users = await User.find().select('-password').lean();
-
     if (!users?.length) {
         return res.status(404).json({ message: "No users found" });
     }

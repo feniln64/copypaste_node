@@ -6,8 +6,8 @@ const Subdomain = require('../models/model.subdomain');
 // @route   GET /init/:subdomain
 // @access  Public
 const initData = asyncHandler(async (req, res) => {
-
-  const sub = req.body.subdomain;
+  console.log("init route hit");
+  const sub = req.params.subdomain;
   const already_exist = await Subdomain.findOne({ subdomain: sub }).lean();
 
   if (!already_exist) {
@@ -17,8 +17,10 @@ const initData = asyncHandler(async (req, res) => {
   const userId = already_exist.userId;
   const contentObject = await Content.findOne({ userId }).lean();
   const content = contentObject.content;
-  
-  if (!already_exist) {
+  if (contentObject.is_protected) {
+    return res.status(401).json({ message: "Content is Protected Login to your account" });
+  }
+  if (!content) {
     return res.status(404).json({ message: "No content found" });
   }
   return res.status(200).json({ content: content });

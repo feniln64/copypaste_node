@@ -13,9 +13,19 @@ const permissionSchema = new mongoose.Schema({
     },
     permission_status: {  // true means active and false means inactive
         type: Boolean,
+        default: true,
         required: true
     },
-
+    permission_type: { // 0 = none ,1 = read, 2 = read and write
+        type: Number,
+        default: 0,
+        required: true
+    },
+    user_ids: {
+        type: [{ type: String }],
+        required: true,
+        ref: 'User'
+    },
     permission_current_period_start: { // date
         type: Date,
         required: true,
