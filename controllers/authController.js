@@ -56,9 +56,7 @@ const signupUser = asyncHandler(async (req, res) => {
       { expiresIn: '30m' }
     )
 
-    sendmail.sendEmail({email,name,emailVarifyToken}).then
-    (result => console.log(result))
-    .catch(err => console.log(err))
+    sendmail.sendEmail({email,name,emailVarifyToken}).then(result => console.log(result)).catch(err => console.log(err))
     
     
     // if (!sendemail) return res.status(500).json({ message: "Something went wrong email not sent" });
@@ -82,8 +80,7 @@ const login = asyncHandler(async (req, res) => {
     res.status(401).json({ message: 'user is not found or not active' });
   }
   const isMatch = bcrypt.compare(password, foundUser.password)
-  const hash = bcrypt.hash(password, 10);
-  console.log(hash)
+
   if (!isMatch) {
     return res.status(401).json({ message: 'Invalid -credentials' });
   }
