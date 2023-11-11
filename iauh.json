@@ -1,55 +1,45 @@
-{
-    "apple": {
-      "apn": {
-        "keyId": "NHHRUF4YF7"
+
+  [
+    {
+      "ComplianceType": "COMPLIANT",
+      "ConfigRuleInvokedTime": "2023-11-09T03:40:46.990Z",
+      "EvaluationResultIdentifier": {
+        "EvaluationResultQualifier": {
+          "ConfigRuleName": "required-tags-s3-buckets",
+          "EvaluationMode": "DETECTIVE",
+          "ResourceId": "config-bucket-461093892882",
+          "ResourceType": "AWS::S3::Bucket"
+        },
+        "OrderingTimestamp": "2023-09-08T20:04:36.979Z"
       },
-      "baseIdentifier": "pass.com.scanbuy.walletpass",
-      "teamIdentifier": "29A4NTD7PX",
-      "webServiceURL": " https://devpassapi.scanbuy.com"
+      "ResultRecordedTime": "2023-11-09T03:40:47.204Z"
     },
-    "scanbuy": {
-      "cdn": {
-        "bucket": "dev-scanbuy-wallet",
-        "url": "https://cdn.scanbuy.com"
+    {
+      "ComplianceType": "COMPLIANT",
+      "ConfigRuleInvokedTime": "2023-11-09T03:41:08.344Z",
+      "EvaluationResultIdentifier": {
+        "EvaluationResultQualifier": {
+          "ConfigRuleName": "required-tags-s3-buckets",
+          "EvaluationMode": "DETECTIVE",
+          "ResourceId": "cpy-pst",
+          "ResourceType": "AWS::S3::Bucket"
+        },
+        "OrderingTimestamp": "2023-02-23T04:21:04.556Z"
       },
-      "secret": "some-secret",
-      "zeus": {
-        "authType": "Scanbuy",
-        "token": "wallet1234"
-      }
+      "ResultRecordedTime": "2023-11-09T03:41:08.505Z"
     },
-    "context": {
-      "environment": "prod"
-    },
-    "dynamodb": {
-      "devices": {
-        "tableName": "dev-walletpass-devices"
+    {
+      "ComplianceType": "COMPLIANT",
+      "ConfigRuleInvokedTime": "2023-11-09T03:41:01.984Z",
+      "EvaluationResultIdentifier": {
+        "EvaluationResultQualifier": {
+          "ConfigRuleName": "first-bucket-38927",
+          "EvaluationMode": "DETECTIVE",
+          "ResourceId": "apps-budibase-scanbuy",
+          "ResourceType": "AWS::S3::Bucket"
+        },
+        "OrderingTimestamp": "2023-02-23T16:21:15.575Z"
       },
-      "passes": {
-        "tableName": "dev-walletpass-passes"
-      },
-      "registration": {
-        "tableName": "dev-walletpass-registration"
-      },
-      "certificate": {
-        "tableName": "dev-walletpass-passes",
-        "id": "id-where-certificate-inserted"
-      },
-      "batchWriteSize":"25"
-    },
-    "google": {
-      "baseUrl": "https://walletobjects.googleapis.com/walletobjects/v1",
-      "issuerId": "3388000000022204848",
-      "webServiceURL": "https://devpassapi.scanbuy.com/v1/devices/registrations"
-    },
-    "s3": {
-      "bucket": "dev-scanbuy-wallet",
-      "connection": {
-        "region": "us-east-2"
-      }
-    },
-    "eventBus": {
-      "eventBusName": "dev-scanbuy-wallet-bridge",
-      "source": "scanbuy.walletpass"
+      "ResultRecordedTime": "2023-11-09T03:41:02.116Z"
     }
-  }
+  ]

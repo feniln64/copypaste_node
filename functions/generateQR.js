@@ -9,14 +9,26 @@ const s3 = new AWS.S3({
 
 var S3_BUCKET = process.env.AWS_BUCKET_NAME;
 
-const upload_to_s3 = (userId, subdomain) => {
+var opts = {
+    errorCorrectionLevel: 'H',
+    type: 'image/png',
+    quality: 0.3,
+    margin: 1,
+    version: 9,
+    color: {
+      dark: "#000000",
+      light: "#ffffff"
+    }
+  }
+
+exports.upload_to_s3 =  (subdomain) => {
     try {
-        QRCode.toDataURL(`http://${subdomain}.cpypst.online`, function (err, qrcode) { // qrcode is response base64 encoded data (QR code)
+        QRCode.toDataURL(`http://${subdomain}.cpypst.online`,opts, function (err, qrcode) { // qrcode is response base64 encoded data (QR code)
             var buf = Buffer.from(qrcode.replace(/^data:image\/\w+;base64,/, ""), 'base64')
             const image_name = Date.now() + "-" + Math.floor(Math.random() * 1000);
             const params = {
                 Bucket: S3_BUCKET,
-                Key: `${userId}/${subdomain}/${image_name}.png`, // type is not required
+                Key: `${subdomain}/${image_name}.png`, // type is not required
                 Body: buf,
                 ContentEncoding: 'base64', // required
                 ContentType: `image/png` // required. Notice the back ticks
@@ -24,17 +36,18 @@ const upload_to_s3 = (userId, subdomain) => {
             s3.upload(params, function (err) {
                 if (err) {
                     console.log('ERROR MSG: ', err);
+                    return false;
                 }
                 else {
                     console.log('Successfully uploaded data');
+                    return true;
                 }
             });
         });
     }
     catch (err) {
         console.log(err);
+        return false;
     }
 
 }
-
-module.exports = upload_to_s3;

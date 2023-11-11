@@ -1,6 +1,6 @@
 const User = require('../models/model.user');
 const asyncHandler = require('express-async-handler');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 require('body-parser');
 
 // @desc    Get all users

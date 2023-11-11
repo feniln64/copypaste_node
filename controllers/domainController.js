@@ -193,10 +193,11 @@ const updateDomain = asyncHandler(async (req, res) => {
 
 const getSubdomainByUserId = asyncHandler(async (req, res) => {
 
-  const userId = req.params;
-  const subdomains = await Subdomain.find(userId).lean().exec();
+  const userId = req.params.userId;
 
-  if (subdomains.length === 0) {
+  const subdomains = await Subdomain.findOne({userId} ).lean();
+ 
+  if (!subdomains) {
     return res.status(204).json({ message: "No subdomains found" });
   }
   return res.json(subdomains);
