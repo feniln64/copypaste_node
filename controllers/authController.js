@@ -193,6 +193,11 @@ const logout = (req, res) => {
   res.status(200).json({ message: 'Logout Successfully' });
 }
 
+const version = (req, res) => {
+  
+  res.status(200).json({ message: 'V2' });
+}
+
 //@desc Forgot Password
 //@route POST /auth/forgotPassword
 //@access public
@@ -270,5 +275,6 @@ module.exports = {
   logout,
   forgotPassword,
   resetPassword,
-  varifyEmail
+  varifyEmail,
+  version
 }

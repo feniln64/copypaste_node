@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Content = require('../models/model.content');
 const Subdomain = require('../models/model.subdomain');
+const pjson = require('../package.json');
 
 // @desc    Get all data
 // @route   GET /init/:subdomain
@@ -52,7 +53,14 @@ const getDns = asyncHandler(async (req, res) => {
   }
 });
 
+
+const versionCheck = asyncHandler(async (req, res) => {
+  console.log(pjson.version);
+  return res.status(200).json({ version: pjson.version });
+});
+
 module.exports = {
   initData,
-  getDns
+  getDns,
+  versionCheck
 }
