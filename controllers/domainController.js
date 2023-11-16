@@ -48,6 +48,11 @@ const createNewSubdomain = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "userId, subdomain and active type are required to create subdomain" });
   }
 
+  const duplicate_subdomain = await User.findOne({ subdomain }).lean().exec();
+  if (duplicate_subdomain) {
+    return res.status(409).json({ message: "subdomain is already taken" });
+  }
+
   const payload = {
     "content": "@",
     "name": subdomain,
@@ -70,6 +75,7 @@ const createNewSubdomain = asyncHandler(async (req, res) => {
 
   QRCode.toDataURL(`http://${subdomain}.cpypst.online`, opts, function () { // Qr-code is response base64 encoded data (QR code)
     const image_name = Date.now() + "-" + Math.floor(Math.random() * 1000);
+    var buf = Buffer.from(qrcode.replace(/^data:image\/\w+;base64,/, ""), 'base64')
     const params = {
       Bucket: S3_BUCKET,
       Key: `${subdomain}/${image_name}.png`, // type is not required

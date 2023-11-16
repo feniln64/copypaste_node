@@ -209,9 +209,12 @@ exports.sendEmail = async (options) => {
     request
 
         .then(result => {
+          
             console.log(result.body)
+            return true;
         })
         .catch(err => {
             console.log(err.statusCode)
+            return false;
         })
 }

@@ -9,14 +9,14 @@ const allowedOrigins = [
   'https://new.localhost:4100',
   'http://vscode.readyle.live:3000',
   'http://test.readyle.live:5000',
-  'https://react.readyle.live',
+  'https://cpypst.online',
   'http://react.readyle.live',
 ]
 
-const re = new RegExp("(^|^[^:]+:\/\/|[^\.]+\.)readyle\.live");
+const re = new RegExp("(^|^[^:]+:\/\/|[^\.]+\.)cpypst\.online");
 
 const corsOptions = {
-  origin: allowedOrigins,
+  origin: re,
   optionsSuccessStatus: 200,
   credentials: true,
 }

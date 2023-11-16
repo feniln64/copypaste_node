@@ -21,7 +21,7 @@ var opts = {
     }
   }
 
-exports.upload_to_s3 =  (subdomain) => {
+exports.upload_to_s3 = async (subdomain) => {
     try {
         QRCode.toDataURL(`http://${subdomain}.cpypst.online`,opts, function (err, qrcode) { // qrcode is response base64 encoded data (QR code)
             var buf = Buffer.from(qrcode.replace(/^data:image\/\w+;base64,/, ""), 'base64')
