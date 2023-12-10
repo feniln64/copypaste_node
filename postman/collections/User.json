@@ -1,0 +1,216 @@
+{
+	"info": {
+		"_postman_id": "b2fd1361-b435-4732-b089-a543c934305a",
+		"name": "User",
+		"description": "SignUp user creates 3 important operation during this api call,\n\nfirst one create user, secondly it creates subdomain for user to create its workspace and third one is send emai to user to varify user email.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "27612305-b2fd1361-b435-4732-b089-a543c934305a"
+	},
+	"item": [
+		{
+			"name": "Sign Up User",
+			"id": "bd246a16-08dd-49b9-81ef-fde83af80c40",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\":\"fenilnakrani39@gmail.com\",\r\n    \"username\":\"feniln36\",\r\n    \"name\":\"fenil nakrani\",\r\n    \"password\":\"test\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/sign-up",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"sign-up"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Log in User",
+			"id": "c295c00e-1965-4893-b977-f31b7dd22504",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\":\"fenilnakrani39@gmail.com\",\r\n    \"password\":\"test\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/sign-in",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"sign-in"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Password",
+			"id": "a46caa2a-6cb8-4eff-b1c7-432624ef9114",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"password\":\"new password\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/reset-password/:resetPasswordToken",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"reset-password",
+						":resetPasswordToken"
+					],
+					"variable": [
+						{
+							"key": "resetPasswordToken",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update User",
+			"id": "0a6dc1cd-c5eb-4f94-b496-44ee7a42017b",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"update name\",\r\n    \"email\": \"fenil1@gmail.com\",\r\n    \"username\": \"feniln3\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user/updateuser/:userId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"updateuser",
+						":userId"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get User Profile",
+			"id": "e51f57ac-d52c-4708-acdb-5dcece69b218",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/user/getProfile/:userId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"user",
+						"getProfile",
+						":userId"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": " 64e01b03f059726416ea6f0c"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vrify Email",
+			"id": "4aac75f1-51ba-47b9-8131-7e4a9d32d2d4",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/auth/varify/email/:token",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"auth",
+						"varify",
+						"email",
+						":token"
+					],
+					"variable": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySW5mbyI6eyJpZCI6IjY0ZTAxYWJkZjA1OTcyNjQxNmVhNmYwOCIsInVzZXJuYW1lIjoiZmVuaWwgbmFrcmFuaSIsImVtYWlsIjoiZmVuaWxAZ21haWwuY29tIiwicHJlbWl1bV91c2VyIjp0cnVlfSwiaWF0IjoxNjk2MTc3MTY1LCJleHAiOjE2OTYxODA3NjV9.8VhJPR1Rc74n1pRr25W0jA952FZRwjAqJpZzt8CYENc"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

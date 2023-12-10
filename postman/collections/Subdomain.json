@@ -1,0 +1,125 @@
+{
+	"info": {
+		"_postman_id": "51c75bc7-db17-48bc-9b56-2f496d0b1ebb",
+		"name": "Subdomain",
+		"description": "creates subdoamin for user workspace, user will able to modify their subdomain to own subdoamin.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "27612305-51c75bc7-db17-48bc-9b56-2f496d0b1ebb"
+	},
+	"item": [
+		{
+			"name": "create new subdomain",
+			"id": "39bb146c-b362-4fea-a890-a95671d0f694",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n    \"subdomain\": \"tt\",\r\n    \"active\":true\r\n} ",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/subdomain/create/:userId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"subdomain",
+						"create",
+						":userId"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "64e01abdf059726416ea6f08"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update subdomain",
+			"id": "ec3f8aae-3b2f-440c-92d6-3e77a8a127ab",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \r\n    \"newDomain\": \"nfinal\",\r\n    \"premium_user\": true\r\n} ",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/subdomain/update/:userId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"subdomain",
+						"update",
+						":userId"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "64e01abdf059726416ea6f08"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get subdomain by ID",
+			"id": "52c554fa-0981-4683-a13c-20cad74dbcb5",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/subdomain/getsubdomain/:userId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"subdomain",
+						"getsubdomain",
+						":userId"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "64e01abdf059726416ea6f08"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
