@@ -1,0 +1,183 @@
+{
+	"info": {
+		"_postman_id": "ea0597db-e7e0-43d5-9ec9-154b23e828ef",
+		"name": "Content",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_uid": "27612305-ea0597db-e7e0-43d5-9ec9-154b23e828ef"
+	},
+	"item": [
+		{
+			"name": "Create Content",
+			"id": "311d031d-4f83-444e-ae75-a4e427c5e950",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"content\":\"<p>new Content</p>\",\r\n    \"is_protected\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/content/create/:userId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"content",
+						"create",
+						":userId"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "64e01abdf059726416ea6f08"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Content",
+			"id": "25989cbe-b88b-4f22-804b-1b6e457f1ab5",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"content\":\"<p>new updated updatedContent</p>\",\r\n    \"is_protected\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/content/update/:userId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"content",
+						"update",
+						":userId"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "64e01abdf059726416ea6f08"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Content",
+			"id": "c7819f9a-caaf-42f0-a67c-0d738bbeea3f",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/content/delete/:userId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"content",
+						"delete",
+						":userId"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "64e01abdf059726416ea6f08"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Content by ID",
+			"id": "ce255b58-117e-4a1e-beb3-8a1fe3ecb949",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/content/getcontent/:userId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"content",
+						"getcontent",
+						":userId"
+					],
+					"variable": [
+						{
+							"key": "userId",
+							"value": "64e01abdf059726416ea6f08"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "5ef217e1-16b2-4e29-a227-5cb173f3d30d",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "1c009256-ca58-4c95-98d1-139c90daad0a",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "fac4f832-15cd-4400-aeca-9b96d19e6a14",
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+}
