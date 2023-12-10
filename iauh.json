@@ -1,0 +1,45 @@
+
+  [
+    {
+      "ComplianceType": "COMPLIANT",
+      "ConfigRuleInvokedTime": "2023-11-09T03:40:46.990Z",
+      "EvaluationResultIdentifier": {
+        "EvaluationResultQualifier": {
+          "ConfigRuleName": "required-tags-s3-buckets",
+          "EvaluationMode": "DETECTIVE",
+          "ResourceId": "config-bucket-461093892882",
+          "ResourceType": "AWS::S3::Bucket"
+        },
+        "OrderingTimestamp": "2023-09-08T20:04:36.979Z"
+      },
+      "ResultRecordedTime": "2023-11-09T03:40:47.204Z"
+    },
+    {
+      "ComplianceType": "COMPLIANT",
+      "ConfigRuleInvokedTime": "2023-11-09T03:41:08.344Z",
+      "EvaluationResultIdentifier": {
+        "EvaluationResultQualifier": {
+          "ConfigRuleName": "required-tags-s3-buckets",
+          "EvaluationMode": "DETECTIVE",
+          "ResourceId": "cpy-pst",
+          "ResourceType": "AWS::S3::Bucket"
+        },
+        "OrderingTimestamp": "2023-02-23T04:21:04.556Z"
+      },
+      "ResultRecordedTime": "2023-11-09T03:41:08.505Z"
+    },
+    {
+      "ComplianceType": "COMPLIANT",
+      "ConfigRuleInvokedTime": "2023-11-09T03:41:01.984Z",
+      "EvaluationResultIdentifier": {
+        "EvaluationResultQualifier": {
+          "ConfigRuleName": "first-bucket-38927",
+          "EvaluationMode": "DETECTIVE",
+          "ResourceId": "apps-budibase-scanbuy",
+          "ResourceType": "AWS::S3::Bucket"
+        },
+        "OrderingTimestamp": "2023-02-23T16:21:15.575Z"
+      },
+      "ResultRecordedTime": "2023-11-09T03:41:02.116Z"
+    }
+  ]
