@@ -25,7 +25,7 @@ const createNewContent = asyncHandler(async (req, res) => {
     console.log("userId =", userId);
     console.log("content =", content);
     console.log("is_protected =", is_protected);
-
+    global.io.emit('content',content);
     // check data if all correct ctreate "contentObject"
     if (!content || typeof is_protected !== "boolean") {
         return res.status(400).json({ message: "content and is_protected boolean is required" });
