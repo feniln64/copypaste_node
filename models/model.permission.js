@@ -6,7 +6,7 @@ const permissionSchema = new mongoose.Schema({
         required: true,
         ref: 'Content'
     },
-    subdoaminId: {
+    subdoaminId: {   // owener user id 
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'Subdomain'

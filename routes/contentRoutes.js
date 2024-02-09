@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const contentController = require('../controllers/contentController');
 
-router.route('/getcontent/:userId') // /content/:userId
+router.route('/getcontent/:userId') // /content/getcontent/:userId
     .get(contentController.getUserContent)
 
 router.route('/create/:userId') // /content/create/:userId

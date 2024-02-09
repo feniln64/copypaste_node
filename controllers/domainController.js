@@ -1,24 +1,20 @@
 const { default: axios } = require('axios');
 const Subdomain = require('../models/model.subdomain');
+const User = require('../models/model.user');
 const asyncHandler = require('express-async-handler');
 var QRCode = require('qrcode')
 const AWS = require("aws-sdk");
 require('body-parser');
 require('dotenv').config();
+const {EmailsApi,cf,minioClient} =require('../config/imports')
 
 // create s3 instance using S3Client 
 // (this is how we create s3 instance in v3)
 const s3 = new AWS.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY, // store it in .env file to keep it safe
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID, // store it in .env file to keep it safe
+  secretAccessKey: process.env.AWS_ACCESS_KEY_SECRET
 });
 var S3_BUCKET = process.env.AWS_BUCKET_NAME;
-
-const cf = axios.create({
-  baseURL: 'https://api.cloudflare.com/client/v4'
-});
-cf.defaults.headers.common["x-auth-key"] = "721d500a5a04d543e57d3a2c17e4bbe1036f2";
-cf.defaults.headers.common["X-Auth-Email"] = "fenilnakrani39@gmail.com";
 
 // @desc    Get all subdoamins
 // @route   GET /subdoamin/getall
@@ -48,7 +44,7 @@ const createNewSubdomain = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "userId, subdomain and active type are required to create subdomain" });
   }
 
-  const duplicate_subdomain = await User.findOne({ subdomain }).lean().exec();
+  const duplicate_subdomain = await Subdomain.findOne({ subdomain }).lean().exec();
   if (duplicate_subdomain) {
     return res.status(409).json({ message: "subdomain is already taken" });
   }
@@ -73,7 +69,7 @@ const createNewSubdomain = asyncHandler(async (req, res) => {
     }
   }
 
-  QRCode.toDataURL(`http://${subdomain}.cpypst.online`, opts, function () { // Qr-code is response base64 encoded data (QR code)
+  QRCode.toDataURL(`http://${subdomain}.cpypst.online`, opts, function (err,qrcode) { // Qr-code is response base64 encoded data (QR code)
     const image_name = Date.now() + "-" + Math.floor(Math.random() * 1000);
     var buf = Buffer.from(qrcode.replace(/^data:image\/\w+;base64,/, ""), 'base64')
     const params = {
@@ -86,6 +82,7 @@ const createNewSubdomain = asyncHandler(async (req, res) => {
     s3.upload(params, function (err) {
       if (err) {
         console.log('ERROR MSG: ', err);
+        return res.status(409).json({ message: "error while upload QR" });
       } else {
         console.log('Successfully uploaded data');
       }

@@ -3,39 +3,25 @@ const asyncHandler = require('express-async-handler')
 const User = require('../models/model.user');
 const Subscription = require('../models/model.subscription');
 const Subdomain = require('../models/model.subdomain');
+const Qr = require('../models/model.qr');
 require('dotenv').config()
-const Mailjet = require('node-mailjet');
 const bcrypt = require('bcrypt');
 const sendmail = require('../functions/sendMail')
 var QRCode = require('qrcode')
 const AWS = require("aws-sdk");
-const { default: axios } = require('axios');
 
-const ElasticEmail = require("@elasticemail/elasticemail-client");
-const defaultClient = ElasticEmail.ApiClient.instance;
-const apikey = defaultClient.authentications["apikey"];
-apikey.apiKey =
-  "D7525C69B59DB4259D4B211F95FA869147FE6F3C0AC644B1AF59E41D045429F45DCD4F52B73FD88C29011004B7A3951E";
 
-const EmailsApi = new ElasticEmail.EmailsApi();
-const mailjet = new Mailjet({
-  apiKey: process.env.MJ_APIKEY_PUBLIC,
-  apiSecret: process.env.MJ_APIKEY_PRIVATE
-});
+const {EmailsApi,cf,minioClient} =require('../config/imports')
+
 const BASE_URL = process.env.BASE_URL || 'localhost:9000'
 
+// const s3 = new AWS.S3({
+//   accessKeyId: process.env.AWS_ACCESS_KEY_ID, // store it in .env file to keep it safe
+//   secretAccessKey: process.env.AWS_ACCESS_KEY_SECRET
+// });
+// var S3_BUCKET = process.env.AWS_BUCKET_NAME;
 
-const s3 = new AWS.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY, // store it in .env file to keep it safe
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-});
-var S3_BUCKET = process.env.AWS_BUCKET_NAME;
 
-const cf = axios.create({
-  baseURL: 'https://api.cloudflare.com/client/v4'
-});
-cf.defaults.headers.common["x-auth-key"] = "721d500a5a04d543e57d3a2c17e4bbe1036f2";
-cf.defaults.headers.common["X-Auth-Email"] = "fenilnakrani39@gmail.com";
 
 //##################################################################################################################
 //###########################------------------CREATE USER-----------------##########################################
@@ -79,31 +65,41 @@ const payload = { "content": "@", "name": username, "proxied": true, "type": "CN
       light: "#ffffff"
     }
   }
-
+  const image_name = username
   await QRCode.toDataURL(`http://${username}.cpypst.online`, opts, function (err, qrcode) { // Qr-code is response base64 encoded data (QR code)
-    const image_name = username
+    
     var buf = Buffer.from(qrcode.replace(/^data:image\/\w+;base64,/, ""), 'base64')
-    const params = {
-      Bucket: S3_BUCKET,
-      Key: `${username}/${image_name}.png`, // type is not required
-      Body: buf,
-      ContentEncoding: 'base64', // required
-      ContentType: `image/png` // required. Notice the back ticks
-    }
-    s3.upload(params, function (err) {
-      if (err) {
-        console.log('ERROR MSG: ', err);
-      } else {
-        console.log('Successfully uploaded data');
-      }
-    });
+    // const params = {
+    //   Bucket: S3_BUCKET,
+    //   Key: `qr/${username}/${image_name}.png`, // type is not required
+    //   Body: buf,
+    //   ContentEncoding: 'base64', // required
+    //   ContentType: `image/png` // required. Notice the back ticks
+    // }
+    
+      minioClient.putObject('docopypaste',`qr/${username}/${image_name}.png`, buf, function (err, objInfo) {
+        if (err) {
+          return console.log(err) // err should be null
+        }
+        console.log('Success', objInfo)
+      
+    })
+    // s3.upload(params, async function (err) {
+    //   if (err) {
+    //     console.log('ERROR MSG: ', err);
+    //     return res.status(409).json({ message: "error while upload QR" });
+    //   } else {
+        
+    //     console.log('Successfully uploaded data');
+    //   }
+    // });
   });
 
 //#####################################################################################################################
 //###########################------------------CREATE SUBDOMAIN IN CLOUDFLARE-----------------#########################
 //#####################################################################################################################
   let dns_record_id = ""
-  let subdoaminObject={}
+
   // creating subdomain in cloudflare
  
   await cf.post(`zones/${process.env.CLOUDFLARE_ZONE_ID}/dns_records`, payload)
@@ -114,26 +110,27 @@ const payload = { "content": "@", "name": username, "proxied": true, "type": "CN
       .catch((error) => {
         return res.status(409).json({ message: "error in function" });
       });
-
+    
+    var useObject = {}
   await User.create(userObject)
     .then(async (user) => {
       console.log("user created successfully")
       console.log(user)
-      const subdomainObject = { userId: user._id,subdomain: username,active:true, dns_record_id };
-      console.log(subdomainObject)
-      const createSubdomain = await Subdomain.create(subdomainObject);
-        if (!createSubdomain) {
-          return res.status(500).json({ message: "subdoamin object could not created" });
-        }
-    }
-    )
+      useObject=user
+    })
     .catch((err) => {
       console.log(err)
       return res.status(409).json({ message: "error in function" });
     });
-      
-  
-  
+
+  const subdomainObject = { userId: useObject._id,subdomain: username,active:true, dns_record_id };
+    console.log(subdomainObject)
+    const createSubdomain = await Subdomain.create(subdomainObject);
+    const createqrcode =await Qr.create({userId:useObject._id,s3_path:`qr/${username}/${image_name}.png`});
+        if (!createSubdomain || !createqrcode) {
+          console.log("subdoamin not created")
+        }
+  console.log("test")
 
 
 //#####################################################################################################################
@@ -495,15 +492,18 @@ const payload = { "content": "@", "name": username, "proxied": true, "type": "CN
       Subject: "Please confirm your Docopypaste account",
     },
   };
-
- await EmailsApi.emailsTransactionalPost(emailData, (error, data, response) => {
+  const callback = (error, data, response) => {
     if (error) {
-      console.error(error);
+        console.error(error);
     } else {
-      console.log("Email sent.");
+        console.log("API called successfully.");
+        console.log("Email sent.");
     }
-  });
+};
+ await EmailsApi.emailsTransactionalPost(emailData,callback)
 
+
+  console.log("test2")
   return res.status(200).json({ message: "user created" });
 });
 
@@ -533,7 +533,8 @@ const login = asyncHandler(async (req, res) => {
     {
       "UserInfo": {
         "id": String(foundUser._id),
-        "username": foundUser.name,
+        "name":foundUser.name,
+        "username": foundUser.username,
         "email": foundUser.email,
         "premium_user": foundUser.premium_user,
       },
@@ -544,7 +545,8 @@ const login = asyncHandler(async (req, res) => {
 
   const userInfo = {
     "id": String(foundUser._id),
-    "username": foundUser.name,
+    "username": foundUser.username,
+    "name":foundUser.name,
     "email": foundUser.email,
     "premium_user": foundUser.premium_user
   }
@@ -711,6 +713,7 @@ const varifyEmail = asyncHandler(async (req, res) => {
 
   res.status(200).json({ message: 'something went wrong' })
 });
+
 module.exports = {
   signupUser,
   login,

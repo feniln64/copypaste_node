@@ -1,4 +1,6 @@
+const re = new RegExp("(^|^[^:]+:\/\/|[^\.]+\.)cpypst\.online");
 const allowedOrigins = [
+  re,
   'http://localhost:3000',
   'http://localhost:3001',
   'http://new.localhost:30001',
@@ -13,10 +15,9 @@ const allowedOrigins = [
   'http://react.readyle.live',
 ]
 
-const re = new RegExp("(^|^[^:]+:\/\/|[^\.]+\.)cpypst\.online");
 
 const corsOptions = {
-  origin: re,
+  origin: allowedOrigins,
   optionsSuccessStatus: 200,
   credentials: true,
 }

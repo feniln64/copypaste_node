@@ -2,13 +2,17 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 const verifyJWT = require('../middleware/verifyJWT');
+const logging = require('../middleware/logging')
 
 router.route('/')
     .get(userController.getAllUsers)
     .delete(userController.deleteUser)
 
-router.route('/updateUser/:userId').patch(verifyJWT, userController.updateUser);
-router.route('/updatePassword/:userId').patch(verifyJWT, userController.updatePassword);
-router.route('/profile/:userId').get(verifyJWT, userController.getUser);
+router.route('/updateuser/:userId').patch(logging, userController.updateUser);
+router.route('/updateProfileImage/:userId').post( logging,userController.updateProfileImage);
+router.route('/getProfile/:userId').get(logging,userController.getProfile)
+router.route('/updatePassword/:userId').patch(logging, userController.updatePassword);
+router.route('/profile/:userId').get(logging, userController.getUser);
+router.route('/delete/:email').delete( logging,userController.deleteUser);
 
 module.exports = router;

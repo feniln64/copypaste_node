@@ -1,17 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const subdomainController = require('../controllers/domainController');
+const logging = require('../middleware/logging')
 
 router.route('/create/:userId') // /subdomain/create/:userId
-    .post(subdomainController.createNewSubdomain);
+    .post(logging,subdomainController.createNewSubdomain);
 
 router.route('/getall')  // /subdomain/getall
-    .get(subdomainController.getAllSubdomain);
+    .get(logging,subdomainController.getAllSubdomain);
 
 router.route('/getsubdomain/:userId')  // /subdomain/getsubdomain/:userId
-    .get(subdomainController.getSubdomainByUserId);
+    .get(logging,subdomainController.getSubdomainByUserId);
 
 router.route('/update/:userId')  // /subdomain/update/:userId
-    .post(subdomainController.updateDomain);
+    .post(logging,subdomainController.updateDomain);
 
 module.exports = router;
