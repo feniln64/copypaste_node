@@ -161,16 +161,15 @@ const deleteUser = asyncHandler(async (req, res) => {
     //  delete subdomain in cloudflare
 
     await cf.delete(`zones/${process.env.CLOUDFLARE_ZONE_ID}/dns_records/${dns_record_id}`)
-        .then(async (response) => {
-
-            console.log("subdoamin created successfully", response.result)
+        .then(async () => {
+            console.log("subdoamin deleted successfully from cloudflare")
         })
         .catch((error) => {
             return res.status(409).json({ message: "error in function" });
         });
 
     await User.deleteOne({ _id:userId })
-        .then(async (user) => {
+        .then(async () => {
             console.log("user deleted successfully")
             const deleteSubdomain = await Subdomain.deleteOne({ dns_record_id });
             if (!deleteSubdomain) {

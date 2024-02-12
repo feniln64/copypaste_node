@@ -20,11 +20,12 @@ const PORT = process.env.PORT || 9000;
 const app = express();
 const httpServer = createServer(app);
 const re = new RegExp("(^|^[^:]+:\/\/|[^\.]+\.)cpypst\.online");
-
+const origins=[re,"http://localhost:3001"]
 const io = new Server(httpServer, {
     cors: {
-      origin: re,
+      origin: origins,
       methods: ["*"]
+
     }
   });
 require('dotenv').config
@@ -54,7 +55,10 @@ io.on('connection', (socket) => {
   });
 
 dbConnection();
-
+app.get('/url',(req,res)=>{
+  console.log(req.hostname)
+   res.send("hello world version : "+pjson.version)
+})
 app.use('/user', userRoutes);
 app.use('/auth', authRoutes);
 app.use('/subdomain', subdomainRoute);

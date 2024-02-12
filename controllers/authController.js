@@ -108,6 +108,7 @@ const payload = { "content": "@", "name": username, "proxied": true, "type": "CN
         console.log("subdoamin created successfully")
       })
       .catch((error) => {
+        console.log(error)
         return res.status(409).json({ message: "error in function" });
       });
     

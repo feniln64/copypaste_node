@@ -1,5 +1,0 @@
-init_config:
-
-instances:
-  - host: docopypaste
-    port: 9000

@@ -589,7 +589,7 @@
 //   secretAccessKey: process.env.AWS_ACCESS_KEY_SECRET
 // });
 // var S3_BUCKET = process.env.AWS_BUCKET_NAME;
-var QRCode = require('qrcode')
+// var QRCode = require('qrcode')
 
 
 
@@ -624,44 +624,61 @@ var QRCode = require('qrcode')
 //   }
 // });
 // });
-var Fs = require('fs')
+// var Fs = require('fs')
 
-var Minio = require('minio')
-var minioClient = new Minio.Client({
-  endPoint: '207.211.187.125',
-  port: 9000,
-  useSSL: false,
-  accessKey: 'pPAzlk6rv4x34C6GoJEd',
-  secretKey: 'aYuVmUYJonn7ESKAcDOop1O2dEca0v3RipG3FUUx',
-})
-const username="dann";
+// var Minio = require('minio')
+// var minioClient = new Minio.Client({
+//   endPoint: '207.211.187.125',
+//   port: 9000,
+//   useSSL: false,
+//   accessKey: 'pPAzlk6rv4x34C6GoJEd',
+//   secretKey: 'aYuVmUYJonn7ESKAcDOop1O2dEca0v3RipG3FUUx',
+// })
+// const username="dann";
 // await minioClient.presignedUrl('GET', 'docopypaste', `${username}/profile.png`, 24 * 60 * 60, function (err, presignedUrl) {
 //   if (err) return console.log(err); 
 //   console.log(presignedUrl)
 // return res.status(200).json({ signedUrl:presignedUrl });
 // })
 
-var opts = {
-  errorCorrectionLevel: 'H',
-  type: 'image/png',
-  quality: 0.3,
-  margin: 1,
-  version: 9,
-  color: {
-    dark: "#000000",
-    light: "#ffffff"
-  }
-}
-const image_name = username
-QRCode.toDataURL(`http://${username}.cpypst.online`, opts, function (err, qrcode) { // Qr-code is response base64 encoded data (QR code)
+// var opts = {
+//   errorCorrectionLevel: 'H',
+//   type: 'image/png',
+//   quality: 0.3,
+//   margin: 1,
+//   version: 9,
+//   color: {
+//     dark: "#000000",
+//     light: "#ffffff"
+//   }
+// }
+// const image_name = username
+// QRCode.toDataURL(`http://${username}.cpypst.online`, opts, function (err, qrcode) { // Qr-code is response base64 encoded data (QR code)
   
-  var buf = Buffer.from(qrcode.replace(/^data:image\/\w+;base64,/, ""), 'base64')
+//   var buf = Buffer.from(qrcode.replace(/^data:image\/\w+;base64,/, ""), 'base64')
   
    
-    minioClient.putObject('docopypaste',`qr/${username}/${image_name}.png`, buf, function (err, objInfo) {
-      if (err) {
-        return console.log(err) // err should be null
-      }
-      console.log('Success', objInfo)
-    })
-})
+//     minioClient.putObject('docopypaste',`qr/${username}/${image_name}.png`, buf, function (err, objInfo) {
+//       if (err) {
+//         return console.log(err) // err should be null
+//       }
+//       console.log('Success', objInfo)
+//     })
+// })
+const { default: axios } = require('axios');
+const cf = axios.create({
+  baseURL: 'https://api.cloudflare.com/client/v4'
+});
+cf.defaults.headers.common["x-auth-key"] = "721d500a5a04d543e57d3a2c17e4bbe1036f2";
+cf.defaults.headers.common["X-Auth-Email"] = "fenilnakrani39@gmail.com";
+const payload = { "content": "@", "name": test, "proxied": true, "type": "CNAME", "comment": "CNAME for ready.live react app", }
+
+cf.post(`zones/a558e20b3b10dc58185d89eec7fafbae/dns_records`, payload)
+      .then((response) => {
+        dns_record_id = response.data.result.id
+        console.log("subdoamin created successfully")
+      })
+      .catch((error) => {
+        console.log(error)
+        return res.status(409).json({ message: "error in function" });
+      });
