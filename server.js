@@ -15,7 +15,6 @@ const fileupload = require("express-fileupload");
 var bodyParser = require('body-parser');
 const {Kafka, logLevel}= require('kafkajs')
 const mongoose = require('mongoose');
-const serverless = require('serverless-http');
 const PORT = process.env.PORT || 9000;
 const app = express();
 const httpServer = createServer(app);
@@ -79,4 +78,3 @@ mongoose.connection.on('error', (err) => {
     process.exit();
 });
 
-module.exports.handler = serverless(app);

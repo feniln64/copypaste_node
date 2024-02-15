@@ -1,8 +1,0 @@
-version: '3'
-services:
-  react:
-    build: .
-    container_name: react_copypaste
-    restart: unless-stopped
-    ports:
-      - 80:80

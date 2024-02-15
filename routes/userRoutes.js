@@ -4,7 +4,7 @@ const userController = require('../controllers/userController');
 const verifyJWT = require('../middleware/verifyJWT');
 const logging = require('../middleware/logging')
 
-router.route('/')
+router.route('/all')
     .get(userController.getAllUsers)
     .delete(userController.deleteUser)
 
