@@ -88,7 +88,7 @@ const payload = { "content": "@", "name": username, "proxied": true, "type": "CN
   const subdomainObject = { userId: useObject._id,subdomain: username,active:true, dns_record_id };
     console.log(subdomainObject)
     const createSubdomain = await Subdomain.create(subdomainObject);
-    const createqrcode =await Qr.create({userId:useObject._id,s3_path:`qr/${username}/${image_name}.png`});
+    const createqrcode =await Qr.create({userId:useObject._id,s3_path:`qr/${username}/${username}.png`});
         if (!createSubdomain || !createqrcode) {
           console.log("subdoamin not created")
         }
@@ -113,8 +113,12 @@ const login = asyncHandler(async (req, res) => {
 
   const foundUser = await User.findOne({ email });
 
-  if (!foundUser || !foundUser.active) {
-    return res.status(401).json({ message: 'user is not found or not active' });
+  if (!foundUser) {
+    return res.status(401).json({ message: 'user is not found ' });
+  }
+
+  if ( !foundUser.active) {
+    return res.status(401).json({ message: 'Please varify your email' });
   }
   const isMatch = bcrypt.compare(password, foundUser.password)
 

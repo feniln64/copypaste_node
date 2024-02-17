@@ -22,8 +22,8 @@ const re = new RegExp("(^|^[^:]+:\/\/|[^\.]+\.)cpypst\.online");
 const origins=[re,"http://localhost:3001"]
 const io = new Server(httpServer, {
     cors: {
-      origin: origins,
-      methods: ["*"]
+      origin: "http://localhost:3001",
+      methods: ["*"],
 
     }
   });
