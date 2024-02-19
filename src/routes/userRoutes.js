@@ -4,10 +4,7 @@ const userController = require('../controllers/userController');
 const verifyJWT = require('../middleware/verifyJWT');
 const logging = require('../middleware/logging')
 
-router.route('/all')
-    .get(userController.getAllUsers)
-    .delete(userController.deleteUser)
-
+router.route('/all').get(logging,userController.getAllUsers)
 router.route('/updateuser/:userId').patch(logging, userController.updateUser);
 router.route('/updateProfileImage/:userId').post( logging,userController.updateProfileImage);
 router.route('/getProfile/:userId').get(logging,userController.getProfile)

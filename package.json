@@ -1,6 +1,6 @@
 {
   "name": "docopypaste",
-  "version": "2.1.5",
+  "version": "2.2.5",
   "description": "",
   "main": "server.js",
   "scripts": {
@@ -41,7 +41,8 @@
     "object-sizeof": "^2.6.2",
     "qrcode": "^1.5.3",
     "redis": "^4.6.13",
-    "socket.io": "^4.7.4"
+    "socket.io": "^4.7.4",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.22",
