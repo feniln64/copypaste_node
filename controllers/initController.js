@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Content = require('../models/model.content');
 const Subdomain = require('../models/model.subdomain');
-const pjson = require('../../package.json');
+const pjson = require('../package.json');
 
 // @desc    Get all data
 // @route   GET /init/:subdomain
