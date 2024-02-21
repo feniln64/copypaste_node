@@ -1,12 +1,17 @@
-const SibApiV3Sdk = require('@getbrevo/brevo');
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
-let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-let apiKey = apiInstance.authentications['apiKey'];
-let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-
-const BASE_URL = process.env.BASE_URL || 'localhost:9000'
-apiKey.apiKey = process.env.BRAVO_API_KEY;
+const nodemailer = require("nodemailer");
+const BASE_URL = process.env.BASE_URL;
+const transporter = nodemailer.createTransport({
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false,
+  auth: {
+    // TODO: replace `user` and `pass` values from <https://forwardemail.net>
+    user: "dannranny@gmail.com",
+    pass: "Gt2hLwydKrvAC3zP",
+  },
+});
 
 const sendMail = async (email, name, username) => {
   const emailVarifyToken = jwt.sign(
@@ -359,17 +364,16 @@ const sendMail = async (email, name, username) => {
       Subject: "Please confirm your Docopypaste account",
     },
   };
-  sendSmtpEmail.subject = emailData.Content.Subject;
-  sendSmtpEmail.htmlContent = emailData.Content.Body[0].Content;
-  sendSmtpEmail.to = [{ "email": email, "name": name }];
-  sendSmtpEmail.sender = { "name": "Cpypst", "email": "email@cpypst.online" };
-
-  await apiInstance.sendTransacEmail(sendSmtpEmail).then(function (data) {
-    console.log('EMAIL API called successfully. Returned data: ' + JSON.stringify(data.response.statusCode));
-
-  }, function (error) {
-    console.error(error.body);
-  });
+  var message = {
+    from: " Do Copypaste <email@cpypst.online>",
+    to: email,
+    subject: emailData.Content.Subject,
+    text: emailData.Content.Body[1].Content,
+    html: emailData.Content.Body[0].Content,
+  };
+  
+    const info = await transporter.sendMail(message);
+    console.log("Message sent: %s", info.messageId);
 }
 
 module.exports = sendMail;

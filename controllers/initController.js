@@ -55,8 +55,7 @@ const getDns = asyncHandler(async (req, res) => {
 
 
 const versionCheck = asyncHandler(async (req, res) => {
-  console.log(pjson.version);
-  return res.status(200).json({ version: pjson.version });
+  return res.status(200).json({ version: pjson.version,description: pjson.description});
 });
 
 module.exports = {

@@ -8,9 +8,10 @@ require('dotenv').config()
 const bcrypt = require('bcrypt');
 var QRCode = require('qrcode')
 const AWS = require("aws-sdk");
+const uploader = require('../functions/generateQR');
 const sendMail = require('../functions/sendMail');
-
-const {cf,minioClient} =require('../config/imports')
+const logger = require('../config/wtLogger');
+const { cf, minioClient } = require('../config/imports')
 
 
 //##################################################################################################################
@@ -38,66 +39,52 @@ const signupUser = asyncHandler(async (req, res) => {
 
   const userObject = { email, username, name, "password": hashedPassword };
 
-// ----------------------------------------------------------------------------------------------------------------------------
-// ----------------------------------------------------------------------------------------------------------------------------
-// ----------------------------------------------------------------------------------------------------------------------------
-  
-const payload = { "content": "@", "name": username, "proxied": true, "type": "CNAME", "comment": "CNAME for ready.live react app", }
+  await uploader(username).then((res) => {
+    logger.info(res)
+  }).catch((err) => {
+    logger.error(err)
+    return res.status(409).json({ message: "error in upload QR " });
+  })
 
-  var opts = {errorCorrectionLevel: 'H',type: 'image/png',quality: 0.3,margin: 1,version: 9,color: {  dark: "#000000",  light: "#ffffff"}}
-  await QRCode.toDataURL(`http://${username}.cpypst.online`, opts, function (err, qrcode) { // Qr-code is response base64 encoded data (QR code)
-    
-    var buf = Buffer.from(qrcode.replace(/^data:image\/\w+;base64,/, ""), 'base64')
-    
-     minioClient.putObject('docopypaste',`qr/${username}/${username}.png`, buf, function (err, objInfo) {
-        if (err) {
-          return console.log(err) // err should be null
-        }
-        console.log('Success', objInfo)
-      
-    })
-  });
-
-//#####################################################################################################################
-//###########################------------------CREATE SUBDOMAIN IN CLOUDFLARE-----------------#########################
-//#####################################################################################################################
+  //#####################################################################################################################
+  //###########################------------------CREATE SUBDOMAIN IN CLOUDFLARE-----------------#########################
+  //#####################################################################################################################
   let dns_record_id = ""
- 
+  const payload = { "content": "@", "name": username, "proxied": true, "type": "CNAME", "comment": "CNAME for ready.live react app", }
+
   await cf.post(`zones/${process.env.CLOUDFLARE_ZONE_ID}/dns_records`, payload)
-      .then((response) => {
-        dns_record_id = response.data.result.id
-        console.log("subdoamin created successfully")
-      })
-      .catch((error) => {
-        console.log(error)
-        return res.status(409).json({ message: "error in function" });
-      });
-    
-    var useObject = {}
+    .then((response) => {
+      dns_record_id = response.data.result.id
+      logger.info("subdoamin created successfully")
+    })
+    .catch((error) => {
+      logger.error(error)
+      return res.status(409).json({ message: "error in function" });
+    });
+
+  var useObject = {}
   await User.create(userObject)
     .then(async (user) => {
-      console.log("user created successfully")
-      console.log(user)
-      useObject=user
+      logger.info("user created successfully")
+      useObject = user
     })
     .catch((err) => {
       console.log(err)
       return res.status(409).json({ message: "error in function" });
     });
 
-  const subdomainObject = { userId: useObject._id,subdomain: username,active:true, dns_record_id };
-    console.log(subdomainObject)
-    const createSubdomain = await Subdomain.create(subdomainObject);
-    const createqrcode =await Qr.create({userId:useObject._id,s3_path:`qr/${username}/${username}.png`});
-        if (!createSubdomain || !createqrcode) {
-          console.log("subdoamin not created")
-        }
+  const subdomainObject = { userId: useObject._id, subdomain: username, active: true, dns_record_id };
+  console.log(subdomainObject)
+  const createSubdomain = await Subdomain.create(subdomainObject);
+  const createqrcode = await Qr.create({ userId: useObject._id, s3_path: `qr/${username}/${username}.png` });
+  if (!createSubdomain || !createqrcode) {
+    console.log("subdoamin not created or qr not created")
+  }
 
-//#####################################################################################################################
-//###########################------------------SEND EMAIL-----------------#############################################  
-//#####################################################################################################################
-
-  await sendMail(email, name, username);
+  await sendMail(email, name, username).catch((err) => {
+    console.log(err)
+    return res.status(409).json({ message: "error in function" });
+  });
   return res.status(200).json({ message: "user created" });
 });
 
@@ -117,7 +104,7 @@ const login = asyncHandler(async (req, res) => {
     return res.status(401).json({ message: 'user is not found ' });
   }
 
-  if ( !foundUser.active) {
+  if (!foundUser.active) {
     return res.status(401).json({ message: 'Please varify your email' });
   }
   const isMatch = bcrypt.compare(password, foundUser.password)
@@ -131,7 +118,7 @@ const login = asyncHandler(async (req, res) => {
     {
       "UserInfo": {
         "id": String(foundUser._id),
-        "name":foundUser.name,
+        "name": foundUser.name,
         "username": foundUser.username,
         "email": foundUser.email,
         "premium_user": foundUser.premium_user,
@@ -144,7 +131,7 @@ const login = asyncHandler(async (req, res) => {
   const userInfo = {
     "id": String(foundUser._id),
     "username": foundUser.username,
-    "name":foundUser.name,
+    "name": foundUser.name,
     "email": foundUser.email,
     "premium_user": foundUser.premium_user
   }

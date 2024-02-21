@@ -670,7 +670,7 @@ const SibApiV3Sdk = require('@getbrevo/brevo');
 let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
 let apiKey = apiInstance.authentications['apiKey'];
-apiKey.apiKey = "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";
+apiKey.apiKey = "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";
 
 let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail(); 
 const emailData = {
@@ -1016,14 +1016,42 @@ const emailData = {
   },
 };
 
-sendSmtpEmail.subject= emailData.Content.Subject;
-sendSmtpEmail.htmlContent= emailData.Content.Body[0].Content;
-sendSmtpEmail.to= [{"email":emailData.Recipients.To[0],"name":"Jane Doe"}];
-sendSmtpEmail.sender= {"name":"Cpypst","email":"email@cpypst.online"};
+// sendSmtpEmail.subject= emailData.Content.Subject;
+// sendSmtpEmail.htmlContent= emailData.Content.Body[0].Content;
+// sendSmtpEmail.to= [{"email":emailData.Recipients.To[0],"name":"Jane Doe"}];
+// sendSmtpEmail.sender= {"name":"Cpypst","email":"email@cpypst.online"};
 
-apiInstance.sendTransacEmail(sendSmtpEmail).then(function(data) {
-  console.log('EMAIL API called successfully. Returned data: ' + JSON.stringify(data));
+// apiInstance.sendTransacEmail(sendSmtpEmail).then(function(data) {
+//   console.log('EMAIL API called successfully. Returned data: ' + JSON.stringify(data));
 
-}, function(error) {
-  console.error(error);
+// }, function(error) {
+//   console.error(error);
+// });
+
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  host: "smtp-relay.brevo.com",
+  port: 587,
+  secure: false,
+  auth: {
+    // TODO: replace `user` and `pass` values from <https://forwardemail.net>
+    user: "dannranny@gmail.com",
+    pass: "Gt2hLwydKrvAC3zP",
+  },
 });
+
+var message = {
+  from: " Do Copypaste <email@cpypst.online>",
+  to: emailData.Recipients.To[0],
+  subject: emailData.Content.Subject,
+  text: emailData.Content.Body[1].Content,
+  html: emailData.Content.Body[0].Content,
+};
+
+async function main() {
+  const info = await transporter.sendMail(message);
+  console.log("Message sent: %s", info.messageId);
+}
+
+main().catch(console.error);
