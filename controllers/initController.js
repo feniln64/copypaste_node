@@ -17,14 +17,16 @@ const initData = asyncHandler(async (req, res) => {
 
   const userId = already_exist.userId;
   const contentObject = await Content.findOne({ userId }).lean();
-  const content = contentObject.content;
+  if (!contentObject) {
+    return res.status(404).json({ message: "No content found" });
+  }
+  console.log(contentObject);
+
   if (contentObject.is_protected) {
     return res.status(401).json({ message: "Content is Protected Login to your account" });
   }
-  if (!content) {
-    return res.status(404).json({ message: "No content found" });
-  }
-  return res.status(200).json({ content: content });
+
+  return res.status(200).json({ "content": contentObject.content, "title": contentObject.title});
 });
 
 // @desc    Get all data

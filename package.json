@@ -1,6 +1,6 @@
 {
   "name": "docopypaste",
-  "version": "2.1.6",
+  "version": "2.2.0",
   "description": "socket.io implementation for docopypaste",
   "main": "server.js",
   "scripts": {

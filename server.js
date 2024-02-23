@@ -21,10 +21,10 @@ const PORT = process.env.PORT || 9000;
 const app = express();
 const httpServer = createServer(app);
 const re = new RegExp("(^|^[^:]+:\/\/|[^\.]+\.)cpypst\.online");
-const origins=[re,"http://localhost:3001"]
+const origins=[re,"http://localhost:3001","http://feniln39.localhost:3001"]
 const io = new Server(httpServer, {
     cors: {
-      origin: "http://localhost:3001",
+      origin: origins,
       methods: ["*"],
 
     }

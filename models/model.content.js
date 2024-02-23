@@ -7,6 +7,10 @@ const contentSchema = new mongoose.Schema({
         required: true,
         ref: 'User'
     },
+    title: {
+        type: String,  //add constraint to frontend also minimum 3 characters required
+        required: true
+    },
     content: {
         type: String,  //add constraint to frontend also minimum 3 characters required
         required: true
