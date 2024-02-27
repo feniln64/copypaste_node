@@ -1,20 +1,21 @@
 version: '3'
 services:
   docopypaste:
-    image: registry.gitlab.com/do-copypaste/copypaste_node:latest
+    build: .
     container_name: node_docopypaste
     restart: unless-stopped
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ./:/app
     networks:
       - traefik-net
     ports:
-      - 9000:9000
+      - 9000
     env_file:
       - .env
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.docopypaste.rule=HostRegexp(`node.readyle.live`)"
+      - "traefik.http.routers.docopypaste.rule=Host(`node.cpypst.online`)"
       - "traefik.http.services.docopypaste.loadbalancer.server.port=9000"
       - "traefik.http.routers.docopypaste.tls.certresolver=lets-encrypt"
       - "traefik.http.routers.docopypaste.tls=true"

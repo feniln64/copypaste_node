@@ -1,8 +1,0 @@
-README.md
-*.log
-
-# ignore aws-sdk
-node_modules/
-.env.example
-.git/*
-__tests__/*

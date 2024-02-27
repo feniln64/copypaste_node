@@ -1,13 +1,8 @@
 const AWS = require('aws-sdk');
 const QRCode = require('qrcode');
+const logger = require('../config/wtLogger');
 require('dotenv').config();
-
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY, // store it in .env file to keep it safe
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-});
-
-var S3_BUCKET = process.env.AWS_BUCKET_NAME;
+const minioClient = require('../config/imports').minioClient;
 
 var opts = {
     errorCorrectionLevel: 'H',
@@ -16,38 +11,30 @@ var opts = {
     margin: 1,
     version: 9,
     color: {
-      dark: "#000000",
-      light: "#ffffff"
+        dark: "#000000",
+        light: "#ffffff"
     }
-  }
+}
 
-exports.upload_to_s3 =  (subdomain) => {
+const uploader = async (username) => {
+    logger.info('Generating QR code for subdomain', username)
     try {
-        QRCode.toDataURL(`http://${subdomain}.cpypst.online`,opts, function (err, qrcode) { // qrcode is response base64 encoded data (QR code)
+        QRCode.toDataURL(`http://${username}.cpypst.online`, opts, async function (err, qrcode) { // qrcode is response base64 encoded data (QR code)
             var buf = Buffer.from(qrcode.replace(/^data:image\/\w+;base64,/, ""), 'base64')
-            const image_name = Date.now() + "-" + Math.floor(Math.random() * 1000);
-            const params = {
-                Bucket: S3_BUCKET,
-                Key: `${subdomain}/${image_name}.png`, // type is not required
-                Body: buf,
-                ContentEncoding: 'base64', // required
-                ContentType: `image/png` // required. Notice the back ticks
-            };
-            s3.upload(params, function (err) {
+            await minioClient.putObject('docopypaste', `qr/${username}/${username}.png`, buf, function (err, objInfo) {
                 if (err) {
-                    console.log('ERROR MSG: ', err);
-                    return false;
+                    logger.error('Error', err)
+                    return err // err should be null
                 }
-                else {
-                    console.log('Successfully uploaded data');
-                    return true;
-                }
+                logger.info('uploaded QR', objInfo)
             });
+
         });
     }
     catch (err) {
-        console.log(err);
-        return false;
+        logger.error('Error', err)
+        return err;
     }
-
 }
+
+module.exports = uploader;

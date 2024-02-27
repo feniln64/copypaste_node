@@ -2,32 +2,33 @@ const jwt = require('jsonwebtoken')
 const asyncHandler = require('express-async-handler')
 const User = require('../models/model.user');
 const Subscription = require('../models/model.subscription');
+const Subdomain = require('../models/model.subdomain');
+const Qr = require('../models/model.qr');
 require('dotenv').config()
-const Mailjet = require('node-mailjet');
 const bcrypt = require('bcrypt');
-const sendmail =require('../functions/sendMail')
-const mailjet = new Mailjet({
-  apiKey: process.env.MJ_APIKEY_PUBLIC,
-  apiSecret: process.env.MJ_APIKEY_PRIVATE
-});
-const BASE_URL = process.env.BASE_URL || 'localhost:9000'
+var QRCode = require('qrcode')
+const AWS = require("aws-sdk");
+const uploader = require('../functions/generateQR');
+const sendMail = require('../functions/sendMail');
+const logger = require('../config/wtLogger');
+const { cf, minioClient } = require('../config/imports')
 
 
-// @desc    create users
-// @route   POST /users
-// @access  Private
+//##################################################################################################################
+//###########################------------------CREATE USER-----------------##########################################
+//##################################################################################################################
 const signupUser = asyncHandler(async (req, res) => {
   const { email, username, name, password } = req.body;
   if (!email || !username || !name || !password) {
     return res.status(400).json({ message: "Please enter all fields" });
   }
 
-  // check if user already exists
+  // check if email already exists
   const duplicate_email = await User.findOne({ email }).lean().exec();
   if (duplicate_email) {
     return res.status(409).json({ message: "Email is taken" });
   }
-
+  // check if username already exists
   const duplicate_username = await User.findOne({ username }).lean().exec();
   if (duplicate_username) {
     return res.status(409).json({ message: "Username is already taken" });
@@ -38,30 +39,53 @@ const signupUser = asyncHandler(async (req, res) => {
 
   const userObject = { email, username, name, "password": hashedPassword };
 
-  const user = await User.create(userObject);
-  // const user = 1;
-  if (!user) {
-    res.status(500).json({ message: "Something went wrong" });
-  }
-  else {
-    const emailVarifyToken = jwt.sign(
-      {
-        "UserInfo": {
+  await uploader(username).then((res) => {
+    logger.info(res)
+  }).catch((err) => {
+    logger.error(err)
+    return res.status(409).json({ message: "error in upload QR " });
+  })
 
-          "username": username,
-          "email": email,
-        },
-      },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: '30m' }
-    )
+  //#####################################################################################################################
+  //###########################------------------CREATE SUBDOMAIN IN CLOUDFLARE-----------------#########################
+  //#####################################################################################################################
+  let dns_record_id = ""
+  const payload = { "content": "@", "name": username, "proxied": true, "type": "CNAME", "comment": "CNAME for ready.live react app", }
 
-    sendmail.sendEmail({email,name,emailVarifyToken}).then(result => console.log(result)).catch(err => console.log(err))
-    
-    
-    // if (!sendemail) return res.status(500).json({ message: "Something went wrong email not sent" });
-    res.status(201).json({ message: `${user} created successfully` });
+  await cf.post(`zones/${process.env.CLOUDFLARE_ZONE_ID}/dns_records`, payload)
+    .then((response) => {
+      dns_record_id = response.data.result.id
+      logger.info("subdoamin created successfully")
+    })
+    .catch((error) => {
+      logger.error(error)
+      return res.status(409).json({ message: "error in function" });
+    });
+
+  var useObject = {}
+  await User.create(userObject)
+    .then(async (user) => {
+      logger.info("user created successfully")
+      useObject = user
+    })
+    .catch((err) => {
+      console.log(err)
+      return res.status(409).json({ message: "error in function" });
+    });
+
+  const subdomainObject = { userId: useObject._id, subdomain: username, active: true, dns_record_id };
+  console.log(subdomainObject)
+  const createSubdomain = await Subdomain.create(subdomainObject);
+  const createqrcode = await Qr.create({ userId: useObject._id, s3_path: `qr/${username}/${username}.png` });
+  if (!createSubdomain || !createqrcode) {
+    console.log("subdoamin not created or qr not created")
   }
+
+  await sendMail(email, name, username).catch((err) => {
+    console.log(err)
+    return res.status(409).json({ message: "error in function" });
+  });
+  return res.status(200).json({ message: "user created" });
 });
 
 //@desc Login
@@ -71,13 +95,17 @@ const login = asyncHandler(async (req, res) => {
 
   const { email, password } = req.body;
   if (!email || !password) {
-    res.status(400).json({ message: 'Please provide email and password both' });
+    return res.status(400).json({ message: 'Please provide email and password both' });
   }
 
   const foundUser = await User.findOne({ email });
 
-  if (!foundUser || !foundUser.active) {
-    res.status(401).json({ message: 'user is not found or not active' });
+  if (!foundUser) {
+    return res.status(401).json({ message: 'user is not found ' });
+  }
+
+  if (!foundUser.active) {
+    return res.status(401).json({ message: 'Please varify your email' });
   }
   const isMatch = bcrypt.compare(password, foundUser.password)
 
@@ -90,7 +118,8 @@ const login = asyncHandler(async (req, res) => {
     {
       "UserInfo": {
         "id": String(foundUser._id),
-        "username": foundUser.name,
+        "name": foundUser.name,
+        "username": foundUser.username,
         "email": foundUser.email,
         "premium_user": foundUser.premium_user,
       },
@@ -101,7 +130,8 @@ const login = asyncHandler(async (req, res) => {
 
   const userInfo = {
     "id": String(foundUser._id),
-    "username": foundUser.name,
+    "username": foundUser.username,
+    "name": foundUser.name,
     "email": foundUser.email,
     "premium_user": foundUser.premium_user
   }
@@ -128,7 +158,7 @@ const login = asyncHandler(async (req, res) => {
     maxAge: 24 * 60 * 60  //1d
   })
 
-  res.status(200).json({ accessToken, userInfo });
+  return res.status(200).json({ accessToken, userInfo });
 });
 
 //@desc Refresh token
@@ -193,6 +223,11 @@ const logout = (req, res) => {
   res.status(200).json({ message: 'Logout Successfully' });
 }
 
+const version = (req, res) => {
+
+  res.status(200).json({ message: 'V2' });
+}
+
 //@desc Forgot Password
 //@route POST /auth/forgotPassword
 //@access public
@@ -255,7 +290,7 @@ const varifyEmail = asyncHandler(async (req, res) => {
     const { username, email } = jwt.decode(token).UserInfo
     const user = await User.findOne({ email: email });
     if (!user) return res.status(401).json({ message: 'User not found' })
-    
+
     user.active = true;
     await user.save();
     return res.status(200).json({ message: 'Email varified successfully' })
@@ -263,6 +298,7 @@ const varifyEmail = asyncHandler(async (req, res) => {
 
   res.status(200).json({ message: 'something went wrong' })
 });
+
 module.exports = {
   signupUser,
   login,
@@ -270,5 +306,6 @@ module.exports = {
   logout,
   forgotPassword,
   resetPassword,
-  varifyEmail
+  varifyEmail,
+  version
 }

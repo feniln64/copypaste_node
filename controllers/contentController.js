@@ -20,19 +20,19 @@ const getAllContent = asyncHandler(async (req, res) => {
 // @access  Private
 const createNewContent = asyncHandler(async (req, res) => {
     console.log("createNewContent called");
-    const { content, is_protected } = req.body;
+    const { content, is_protected, title } = req.body;
     const userId = req.params.userId;
 
     // check data if all correct create "contentObject"
-    if (!content || typeof is_protected !== "boolean") {
-        return res.status(400).json({ message: "content and is_protected boolean is required" });
+    if (!content || typeof is_protected !== "boolean" || !title) {
+        return res.status(400).json({ message: "content and is_protected boolean and title is required" });
     }
     const content_size = sizeof(content);
 
     if (content_size > 28000) {
         return res.status(413).json({ message: "Content is to large" });
     }
-    const contentObject = { userId, content, is_protected };
+    const contentObject = { userId, content, is_protected,title };
 
     // check if content already exists the update content with new values
     const already_exist = await Content.findOne({ userId }).lean();
@@ -71,7 +71,7 @@ const getUserContent = asyncHandler(async (req, res) => {
         return res.status(404).json({ message: "No content found" });
     }
 
-    return res.json(already_exist['content']);
+    return res.json({"content":already_exist['content'],"isCheckd":already_exist['is_protected'], "title":already_exist['title']});
 });
 
 // @desc    create content
