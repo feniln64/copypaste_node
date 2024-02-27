@@ -1,13 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const initDataController = require('../controllers/initController');
-const userController = require('../controllers/userController');
+const logging = require('../middleware/logging')
 
-router.route('/') // /init
-    .post(initDataController.initData)
+router.route('/getdata/:subdomain').get(initDataController.initData);
+router.route('/dns').get(initDataController.getDns);
+router.route('/version').get(logging,initDataController.versionCheck);
 
-router.route('/dns') // /init
-    .get(initDataController.getDns)
-// router.route('/profile') // /init/profile
-//     .get(userController.getUser)
 module.exports = router;

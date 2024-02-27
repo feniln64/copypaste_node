@@ -1,12 +1,14 @@
 const mongoose = require('mongoose');
+const logger = require('./wtLogger');
 require('dotenv').config()
-const dbConnection = async() => {
+
+const dbConnection = async () => {
     try {
         await mongoose.connect(process.env.DATABASE_URI);
-        console.log("Database Connected");
+        logger.info("Database Connected");
     }
-    catch(err){
-        console.log(err)
+    catch (err) {
+        logger.info(err)
     }
 }
 

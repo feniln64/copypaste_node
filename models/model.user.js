@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const crypto = require("crypto");
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcrypt')
 
 const userSchema = new mongoose.Schema(
     {
@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
         },
         active: {
             type: Boolean,
-            default: true
+            default: false
         },
         premium_user: {
             type: Boolean,
@@ -48,23 +48,20 @@ const userSchema = new mongoose.Schema(
     }
 )
 
-userSchema.pre('save', async function (next){
-    // if(this.isModified('password')) return next();
-
+userSchema.pre('save', async function (next) {
     this.password = await bcrypt.hash(this.password, 10);
     next();
 });
 
-userSchema.methods.comparePassword = async function(candidatePassword){
+userSchema.methods.comparePassword = async function (candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);
 }
 
-userSchema.methods.getResetPasswordToken = function(){
-    const resetToken = crypto.randomBytes(20).toString('hex');
+userSchema.methods.getResetPasswordToken = function () {
 
+    const resetToken = crypto.randomBytes(20).toString('hex');
     this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
     this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
-
     return resetToken;
 }
 

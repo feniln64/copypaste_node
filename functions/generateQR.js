@@ -1,41 +1,40 @@
 const AWS = require('aws-sdk');
-const fs = require('fs');
-const QRCode = require('qrcode')
+const QRCode = require('qrcode');
+const logger = require('../config/wtLogger');
 require('dotenv').config();
-// create s3 instance using S3Client
-// (this is how we create s3 instance in v3)
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY, // store it in .env file to keep it safe
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+const minioClient = require('../config/imports').minioClient;
 
-})
-var S3_BUCKET = process.env.AWS_BUCKET_NAME;
-const upload_to_s3 = (userId, subdomain) => {
+var opts = {
+    errorCorrectionLevel: 'H',
+    type: 'image/png',
+    quality: 0.3,
+    margin: 1,
+    version: 9,
+    color: {
+        dark: "#000000",
+        light: "#ffffff"
+    }
+}
+
+const uploader = async (username) => {
+    logger.info('Generating QR code for subdomain', username)
     try {
-        QRCode.toDataURL(`http://${subdomain}.cpypst.online`, function (err, qrcode) { // qrcode is response base64 encoded data (QR code)
+        QRCode.toDataURL(`http://${username}.cpypst.online`, opts, async function (err, qrcode) { // qrcode is response base64 encoded data (QR code)
             var buf = Buffer.from(qrcode.replace(/^data:image\/\w+;base64,/, ""), 'base64')
-            const image_name = Date.now() + "-" + Math.floor(Math.random() * 1000);
-            const params = {
-                Bucket: S3_BUCKET,
-                Key: `${userId}/${subdomain}/${image_name}.png`, // type is not required
-                Body: buf,
-                ContentEncoding: 'base64', // required
-                ContentType: `image/png` // required. Notice the back ticks
-            }
-            s3.upload(params, function (err, data) {
-
+            await minioClient.putObject('docopypaste', `qr/${username}/${username}.png`, buf, function (err, objInfo) {
                 if (err) {
-                    console.log('ERROR MSG: ', err);
-                } else {
-                    console.log('Successfully uploaded data');
+                    logger.error('Error', err)
+                    return err // err should be null
                 }
+                logger.info('uploaded QR', objInfo)
             });
+
         });
     }
     catch (err) {
-        console.log(err);
+        logger.error('Error', err)
+        return err;
     }
-
 }
 
-module.exports = upload_to_s3;
+module.exports = uploader;
