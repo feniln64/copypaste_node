@@ -4,7 +4,7 @@ const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcrypt');
 require('dotenv').config()
 require('body-parser');
-const { EmailsApi, cf, minioClient } = require('../config/imports')
+const { cf, minioClient } = require('../config/imports')
 const multer = require('multer');
 const logger = require('../config/wtLogger');
 
