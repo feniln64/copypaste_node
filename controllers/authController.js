@@ -1,18 +1,15 @@
 const jwt = require('jsonwebtoken')
 const asyncHandler = require('express-async-handler')
 const User = require('../models/model.user');
-const Subscription = require('../models/model.subscription');
 const Subdomain = require('../models/model.subdomain');
 const Qr = require('../models/model.qr');
 require('dotenv').config()
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-var QRCode = require('qrcode')
-const AWS = require("aws-sdk");
 const uploader = require('../functions/generateQR');
 const sendMail = require('../functions/sendMail');
 const logger = require('../config/wtLogger');
-const { cf, minioClient } = require('../config/imports')
+const { cf } = require('../config/imports')
 
 
 //##################################################################################################################
@@ -35,12 +32,8 @@ const signupUser = asyncHandler(async (req, res) => {
     return res.status(409).json({ message: "Username is already taken" });
   }
 
-  // hash password
 
-  const hashedPassword = await bcrypt.hashSync(password, 10);
-
-  const userObject = { email, username, name, "password": hashedPassword };
-  console.log(userObject)
+  const userObject = { email, username, name,password }; // password will be hashed in model
   await uploader(username).then((res) => {
     logger.info(res)
   }).catch((err) => {
@@ -69,7 +62,6 @@ const signupUser = asyncHandler(async (req, res) => {
     .then(async (user) => {
       logger.info("user created successfully")
       useObject = user
-      console.log(useObject)
     })
     .catch((err) => {
       console.log(err)
@@ -103,21 +95,19 @@ const login = asyncHandler(async (req, res) => {
   }
 
   const foundUser = await User.findOne({ email });
-  console.log(foundUser.password)
   if (!foundUser) {
     return res.status(401).json({ message: 'user is not found ' });
   }
+  console.log(foundUser.password)
 
   if (!foundUser.active) {
     return res.status(401).json({ message: 'Please varify your email' });
   }
   
-  const isMatch =  await bcrypt.compareSync(password,foundUser.password)
-  console.log(isMatch)
+  const isMatch =  bcrypt.compareSync(password,foundUser.password)
   if (!isMatch) {
-    return res.status(401).json({ message: 'Invalid -credentials' });
+    return res.status(401).json({ message: 'Invalid - credentials' });
   }
-
 
   const accessToken = jwt.sign(
     {
@@ -265,12 +255,11 @@ const resetPassword = asyncHandler(async (req, res) => {
   const resetPasswordToken = crypto.createHash('sha256').update(req.params.resetPasswordToken).digest('hex');
 
   const user = await User.findOne({ resetPasswordToken, resetPasswordExpire: { $gt: Date.now() } });
-  console.log(user)
   if (!user) {
     res.status(401).json({ message: 'Invalid token' });
   }
 
-  user.password = await bcrypt.hashSync(req.body.password, 10);
+  user.password = req.body.password;
   user.resetPasswordExpire = undefined;
   user.resetPasswordToken = undefined;
 

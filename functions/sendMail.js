@@ -8,8 +8,8 @@ const transporter = nodemailer.createTransport({
   secure: false,
   auth: {
     // TODO: replace `user` and `pass` values from <https://forwardemail.net>
-    user: "dannranny@gmail.com",
-    pass: "Gt2hLwydKrvAC3zP",
+    user: process.env.BRAVO_SMTP_USER,
+    pass: process.env.BRAVO_SMTP_PASSWORD,
   },
 });
 
