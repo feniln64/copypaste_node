@@ -16,7 +16,7 @@ const initData = asyncHandler(async (req, res) => {
   }
 
   const userId = already_exist.userId;
-  const contentObject = await Content.findOne({ userId }).lean();
+  const contentObject = await Content.find({ userId, is_protected:false }).lean();
   if (!contentObject) {
     return res.status(404).json({ message: "No content found" });
   }
@@ -26,7 +26,7 @@ const initData = asyncHandler(async (req, res) => {
     return res.status(401).json({ message: "Content is Protected Login to your account" });
   }
 
-  return res.status(200).json({ "content": contentObject.content, "title": contentObject.title});
+  return res.status(200).json({ "content": contentObject});
 });
 
 // @desc    Get all data
@@ -44,7 +44,7 @@ const getDns = asyncHandler(async (req, res) => {
   }
   catch (error) {
     if (error.response) {
-      alert(error.response.data.message);
+      console.log(error.response.data.message);
     }
     else if (error.request) {
       console.log("network error");

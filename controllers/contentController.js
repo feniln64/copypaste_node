@@ -34,22 +34,6 @@ const createNewContent = asyncHandler(async (req, res) => {
     }
     const contentObject = { userId, content, is_protected,title };
 
-    // check if content already exists the update content with new values
-    const already_exist = await Content.findOne({ userId }).lean();
-
-    if (already_exist) {
-
-        const update_content = await Content.updateOne(contentObject);
-
-        if (!update_content) {
-            return res.status(500).json({ message: "Problem updating content" });
-        }
-        else {
-            return res.status(201).json({ message: `content updated successfully` });
-        }
-    }
-
-    // create content if not exists
     const createContent = await Content.create(contentObject);
     if (!createContent) {
         return res.status(500).json({ message: "Something went wrong" });
@@ -66,18 +50,55 @@ const getUserContent = asyncHandler(async (req, res) => {
     console.log("getUserContent called");
     const userId = req.params.userId; //doimain.com/users/email(value of email)
 
-    const already_exist = await Content.findOne({ userId }).lean();
+    const already_exist = await Content.find({ userId }).lean();
     if (!already_exist) {
         return res.status(404).json({ message: "No content found" });
     }
 
-    return res.json({"content":already_exist['content'],"isCheckd":already_exist['is_protected'], "title":already_exist['title']});
+    return res.json({"content":already_exist});
 });
 
 // @desc    create content
 // @route   POST /content/update/:userId
 // @access  Private
-const updateUserContent = asyncHandler(async (req, res) => {
+const updateContentByUserId = asyncHandler(async (req, res) => {
+    console.log("updateUserContent called");
+    const { content, is_protected } = req.body;
+    const userId = req.params.userId;
+
+    // check data if all correct create "contentObject"
+    if (!content || typeof is_protected !== "boolean") {
+        return res.status(400).json({ message: "content and is_protected boolean is required" });
+    }
+    const content_size = sizeof(content);
+    if (content_size > 28000) {
+        return res.status(413).json({ message: "Content is to large" });
+    }
+    const contentObject = { userId, content, is_protected };
+
+    // check if content already exists the update content with new values
+    const already_exist = await Content.findOne({ userId }).lean();
+
+    if (already_exist) {
+        const update_content = await Content.updateOne(contentObject);
+        
+        if (!update_content) return res.status(500).json({ message: "Problem updating content" });
+
+        else return res.status(201).json({ message: `content updated successfully` });
+        
+    }
+
+    // create content if not exists
+    const createContent = await Content.create(contentObject);
+    if (!createContent) {
+        return res.status(500).json({ message: "Something went wrong" });
+    }
+    else {
+        return res.status(201).json({ message: `content ${content} created successfully` });
+    }
+});
+
+const updateContentByContentId = asyncHandler(async (req, res) => {
     console.log("updateUserContent called");
     const { content, is_protected } = req.body;
     const userId = req.params.userId;
@@ -140,6 +161,7 @@ module.exports = {
     getAllContent,
     createNewContent,
     getUserContent,
-    updateUserContent,
+    updateContentByUserId,
+    updateContentByContentId,
     deleteUserContent
 }
