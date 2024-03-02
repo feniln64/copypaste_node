@@ -6,6 +6,7 @@ const Subdomain = require('../models/model.subdomain');
 const Qr = require('../models/model.qr');
 require('dotenv').config()
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 var QRCode = require('qrcode')
 const AWS = require("aws-sdk");
 const uploader = require('../functions/generateQR');
@@ -35,10 +36,11 @@ const signupUser = asyncHandler(async (req, res) => {
   }
 
   // hash password
-  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const hashedPassword = await bcrypt.hashSync(password, 10);
 
   const userObject = { email, username, name, "password": hashedPassword };
-
+  console.log(userObject)
   await uploader(username).then((res) => {
     logger.info(res)
   }).catch((err) => {
@@ -59,7 +61,7 @@ const signupUser = asyncHandler(async (req, res) => {
     })
     .catch((error) => {
       logger.error(error)
-      return res.status(409).json({ message: "error in function" });
+      return res.status(409).json({ message: "subdoamin in cloudflare not created" });
     });
 
   var useObject = {}
@@ -67,10 +69,11 @@ const signupUser = asyncHandler(async (req, res) => {
     .then(async (user) => {
       logger.info("user created successfully")
       useObject = user
+      console.log(useObject)
     })
     .catch((err) => {
       console.log(err)
-      return res.status(409).json({ message: "error in function" });
+      return res.status(409).json({ message: "user not created" });
     });
 
   const subdomainObject = { userId: useObject._id, subdomain: username, active: true, dns_record_id };
@@ -94,12 +97,13 @@ const signupUser = asyncHandler(async (req, res) => {
 const login = asyncHandler(async (req, res) => {
 
   const { email, password } = req.body;
+  console.log(email, password)
   if (!email || !password) {
     return res.status(400).json({ message: 'Please provide email and password both' });
   }
 
   const foundUser = await User.findOne({ email });
-
+  console.log(foundUser.password)
   if (!foundUser) {
     return res.status(401).json({ message: 'user is not found ' });
   }
@@ -107,8 +111,9 @@ const login = asyncHandler(async (req, res) => {
   if (!foundUser.active) {
     return res.status(401).json({ message: 'Please varify your email' });
   }
-  const isMatch = bcrypt.compare(password, foundUser.password)
-
+  
+  const isMatch =  await bcrypt.compareSync(password,foundUser.password)
+  console.log(isMatch)
   if (!isMatch) {
     return res.status(401).json({ message: 'Invalid -credentials' });
   }
@@ -241,7 +246,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
   const foundUser = await User.findOne({ email });
 
   if (!foundUser || !foundUser.active) {
-    res.status(401).json({ message: 'Invalid credentials' });
+    res.status(401).json({ message: 'User not found' });
   }
 
   const resetToken = foundUser.getResetPasswordToken();
@@ -253,24 +258,26 @@ const forgotPassword = asyncHandler(async (req, res) => {
 });
 
 //@desc Reset Password
-//@route POST /auth/reset-password
+//@route POST /auth/reset-password/:resetPasswordToken
 //@access public
 const resetPassword = asyncHandler(async (req, res) => {
 
   const resetPasswordToken = crypto.createHash('sha256').update(req.params.resetPasswordToken).digest('hex');
 
   const user = await User.findOne({ resetPasswordToken, resetPasswordExpire: { $gt: Date.now() } });
-
+  console.log(user)
   if (!user) {
     res.status(401).json({ message: 'Invalid token' });
   }
 
-  user.password = req.body.password;
+  user.password = await bcrypt.hashSync(req.body.password, 10);
   user.resetPasswordExpire = undefined;
   user.resetPasswordToken = undefined;
 
-  await user.save();
-
+  const newUser=await user.save();
+  if (!newUser) {
+    res.status(500).json({ message: 'password not updated' });
+  }
   res.status(200).json({ message: 'Password reset successfully!!' });
 });
 

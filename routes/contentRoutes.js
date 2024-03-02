@@ -9,7 +9,10 @@ router.route('/create/:userId') // /content/create/:userId
     .post(contentController.createNewContent)
 
 router.route('/update/:userId') // /content/update/:userId
-    .post(contentController.updateUserContent) 
+    .post(contentController.updateContentByUserId) 
+
+router.route('/update/:contentId') // /content/update/:contentId
+    .post(contentController.updateContentByContentId) 
 
 router.route('/delete/:userId') // /content/delete/:userId
     .delete(contentController.deleteUserContent) 
