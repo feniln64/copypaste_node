@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const asyncHandler = require('express-async-handler')
 const User = require('../models/model.user');
+const Content = require('../models/model.content');
 const Subdomain = require('../models/model.subdomain');
 const Qr = require('../models/model.qr');
 require('dotenv').config()
@@ -12,9 +13,6 @@ const logger = require('../config/wtLogger');
 const { cf } = require('../config/imports')
 
 
-//##################################################################################################################
-//###########################------------------CREATE USER-----------------##########################################
-//##################################################################################################################
 const signupUser = asyncHandler(async (req, res) => {
   const { email, username, name, password } = req.body;
   if (!email || !username || !name || !password) {
@@ -89,7 +87,7 @@ const signupUser = asyncHandler(async (req, res) => {
 const login = asyncHandler(async (req, res) => {
 
   const { email, password } = req.body;
-  console.log(email, password)
+
   if (!email || !password) {
     return res.status(400).json({ message: 'Please provide email and password both' });
   }
@@ -98,7 +96,6 @@ const login = asyncHandler(async (req, res) => {
   if (!foundUser) {
     return res.status(401).json({ message: 'user is not found ' });
   }
-  console.log(foundUser.password)
 
   if (!foundUser.active) {
     return res.status(401).json({ message: 'Please varify your email' });
@@ -108,21 +105,7 @@ const login = asyncHandler(async (req, res) => {
   if (!isMatch) {
     return res.status(401).json({ message: 'Invalid - credentials' });
   }
-
-  const accessToken = jwt.sign(
-    {
-      "UserInfo": {
-        "id": String(foundUser._id),
-        "name": foundUser.name,
-        "username": foundUser.username,
-        "email": foundUser.email,
-        "premium_user": foundUser.premium_user,
-      },
-    },
-    process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: '1h' }
-  )
-
+  
   const userInfo = {
     "id": String(foundUser._id),
     "username": foundUser.username,
@@ -130,20 +113,11 @@ const login = asyncHandler(async (req, res) => {
     "email": foundUser.email,
     "premium_user": foundUser.premium_user
   }
+  const content = await  Content.find({userId: foundUser._id}).lean();
+  const subdomains = await Subdomain.find({userId: foundUser._id}).lean();
+  const accessToken = jwt.sign({"userInfo": userInfo},process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h' })
 
-  const refreshToken = jwt.sign(
-    {
-      "UserInfo": {
-        "id": String(foundUser._id),
-        "username": foundUser.name,
-        "email": foundUser.email,
-        "premium_user": foundUser.premium_user
-      }
-    },
-    process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: '1d' }
-
-  )
+  const refreshToken = jwt.sign({"userInfo": userInfo},process.env.REFRESH_TOKEN_SECRET,{ expiresIn: '1d' })
 
   //create cookie wih refresh token
   res.cookie('jwt', refreshToken, {
@@ -153,7 +127,7 @@ const login = asyncHandler(async (req, res) => {
     maxAge: 24 * 60 * 60  //1d
   })
 
-  return res.status(200).json({ accessToken, userInfo });
+  return res.status(200).json({ accessToken, userInfo, content, subdomains});
 });
 
 //@desc Refresh token
@@ -185,18 +159,7 @@ const refresh = (req, res) => {
       "premium_user": foundUser.premium_user
     }
 
-    const accessToken = jwt.sign(
-      {
-        "UserInfo": {
-          "id": String(foundUser._id),
-          "username": foundUser.name,
-          "email": foundUser.email,
-          "premium_user": foundUser.premium_user,
-        }
-      },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: '1h' }
-    )
+    const accessToken = jwt.sign({"userInfo": userInfo},process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h' })
     res.status(200).json({ accessToken, userInfo })
   }));
 }
@@ -270,6 +233,37 @@ const resetPassword = asyncHandler(async (req, res) => {
   res.status(200).json({ message: 'Password reset successfully!!' });
 });
 
+//@desc Reset Password
+//@route POST /auth/update-password/:userId
+//@access public
+const updatePassword = asyncHandler(async (req, res) => {
+  const userId = req.params.userId;
+  const {currentPassword, newPassword} = req.body;
+  if (!currentPassword || !newPassword) {
+    res.status(400).json({ message: 'current and old password required' });
+  }
+
+  const user = await User.findOne({ _id: userId });
+  if (!user) {
+    res.status(401).json({ message: 'user not ound' });
+  }
+  const matchPassword = await bcrypt.compare(currentPassword, user.password);
+  if (!matchPassword) {
+    res.status(401).json({ message: 'current password is wrong' });
+  }
+
+  user.password = newPassword;
+
+  const newUser=await user.save();
+  if (!newUser) {
+    res.status(500).json({ message: 'password not updated' });
+  }
+  res.status(200).json({ message: 'Password reset successfully!!' });
+});
+
+//@desc Reset Password
+//@route POST /auth/varify/email/:token
+//@access public
 const varifyEmail = asyncHandler(async (req, res) => {
   const token = req.params.token
   console.log("varify email called")
@@ -302,6 +296,7 @@ module.exports = {
   logout,
   forgotPassword,
   resetPassword,
+  updatePassword,
   varifyEmail,
   version
 }
