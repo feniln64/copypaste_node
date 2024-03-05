@@ -1,7 +1,7 @@
 {
   "name": "docopypaste",
-  "version": "2.2.0",
-  "description": "socket.io implementation for docopypaste",
+  "version": "2.3.0",
+  "description": "content routes chnaged added new routes",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

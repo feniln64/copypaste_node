@@ -35,11 +35,12 @@ const createNewContent = asyncHandler(async (req, res) => {
     const contentObject = { userId, content, is_protected,title };
 
     const createContent = await Content.create(contentObject);
+    const alldata = await Content.find({userId:userId}).lean();
     if (!createContent) {
         return res.status(500).json({ message: "Something went wrong" });
     }
     else {
-        return res.status(201).json({ message: `content ${content} created successfully` });
+        return res.status(201).json({ message: `content ${content} created successfully`, "content":alldata });
     }
 });
 
@@ -100,53 +101,72 @@ const updateContentByUserId = asyncHandler(async (req, res) => {
 
 const updateContentByContentId = asyncHandler(async (req, res) => {
     console.log("updateUserContent called");
-    const { content, is_protected } = req.body;
-    const userId = req.params.userId;
+    const { content, is_protected,title } = req.body;
+    const contentId = req.params.contentId;
 
     // check data if all correct create "contentObject"
-    if (!content || typeof is_protected !== "boolean") {
-        return res.status(400).json({ message: "content and is_protected boolean is required" });
+    if (!content || typeof is_protected !== "boolean" || !title) {
+        return res.status(400).json({ message: "content and is_protected boolean and title is required is required" });
     }
     const content_size = sizeof(content);
     if (content_size > 28000) {
         return res.status(413).json({ message: "Content is to large" });
     }
-    const contentObject = { userId, content, is_protected };
-
     // check if content already exists the update content with new values
-    const already_exist = await Content.findOne({ userId }).lean();
+    const already_exist = await Content.findOne({_id: contentId }).exec();
 
     if (already_exist) {
-        const update_content = await Content.updateOne(contentObject);
+        already_exist.content = content;
+        already_exist.is_protected = is_protected;
+        already_exist.title = title;
+
+        const update_content = await already_exist.save();
         
         if (!update_content) return res.status(500).json({ message: "Problem updating content" });
 
-        else return res.status(201).json({ message: `content updated successfully` });
+        else return res.status(200).json({ message: `content updated successfully` });
         
-    }
+    }   
+    return res.status(404).json({ message: "No content found to update" });
 
-    // create content if not exists
-    const createContent = await Content.create(contentObject);
-    if (!createContent) {
-        return res.status(500).json({ message: "Something went wrong" });
-    }
-    else {
-        return res.status(201).json({ message: `content ${content} created successfully` });
-    }
 });
 
-// @desc    create content
-// @route   DELETE /content/update/:userId
-// @access  Private
-const deleteUserContent = asyncHandler(async (req, res) => {
-    console.log("deleteUserContent called");
-    const userId = req.params.userId;
+// // @desc    create content
+// // @route   DELETE /content/update/:userId
+// // @access  Private
+// const deleteUserContent = asyncHandler(async (req, res) => {
+//     console.log("deleteUserContent called");
+//     const userId = req.params.userId;
 
+//     // check if content already exists the update content with new values
+//     const already_exist = await Content.findOne({ userId }).lean().exec();
+
+//     if (already_exist) {
+//         const delete_content = await Content.deleteOne({ userId });
+//         if (!delete_content) {
+//             return res.status(500).json({ message: "Problem deleting content" });
+//         }
+//         else {
+//             return res.status(201).json({ message: `content deleted successfully` });
+//         }
+//     }
+//     return res.status(404).json({ message: "No content found to delete" });
+// });
+
+// // @desc    create content
+// // @route   DELETE /content/update/:contentId
+// // @access  Private
+const deleteContentByContentId = asyncHandler(async (req, res) => {
+  
+    const contentId = req.params.contentId;
+    if (!contentId) {
+        return res.status(400).json({ message: "contentId is required in params" });
+    }
     // check if content already exists the update content with new values
-    const already_exist = await Content.findOne({ userId }).lean().exec();
+    const already_exist = await Content.findOne({ _id:contentId }).lean().exec();
 
     if (already_exist) {
-        const delete_content = await Content.deleteOne({ userId });
+        const delete_content = await Content.deleteOne({ _id:contentId });
         if (!delete_content) {
             return res.status(500).json({ message: "Problem deleting content" });
         }
@@ -163,5 +183,6 @@ module.exports = {
     getUserContent,
     updateContentByUserId,
     updateContentByContentId,
-    deleteUserContent
+    // deleteUserContent,
+    deleteContentByContentId
 }
