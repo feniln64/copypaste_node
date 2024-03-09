@@ -4,7 +4,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
   'http://new.localhost:30001',
-  'http://feniln39.localhost:3001',
+  'http://feniln64.localhost:3001',
   'http://new.test.localhost:3000',
   'http://test.localhost:3000',
   'https://localhost:4100',

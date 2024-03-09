@@ -1,7 +1,7 @@
 {
   "name": "docopypaste",
-  "version": "2.3.0",
-  "description": "content routes chnaged added new routes",
+  "version": "2.4.0",
+  "description": "new public routes added",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

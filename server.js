@@ -21,7 +21,7 @@ const PORT = process.env.PORT || 9000;
 const app = express();
 const httpServer = createServer(app);
 const re = new RegExp("(^|^[^:]+:\/\/|[^\.]+\.)cpypst\.online");
-const origins=[re,"http://localhost:3001","http://feniln39.localhost:3001"]
+const origins=[re,"http://localhost:3001","http://feniln64.localhost:3001"]
 const io = new Server(httpServer, {
     cors: {
       origin: origins,
@@ -41,15 +41,20 @@ io.on('connection', (socket) => {
     console.info(`Admin Client connected [id=${socket.id}]`);
 
     socket.on('join_room',room=>{                 // client will emmit message asking to join room
-      socket.join(room)                             // server join the room by creating it
+      socket.join(room)       
+      console.log(room)                      // server join the room by creating it
       logger.info("room joined : ",room)
     })
     // send message to room
-    socket.on('message',(data)=>{                        // clinet send message with room and data
-      socket.to(data.room).emit('message',data.message)     // server sends message to that particular room 
+    socket.on('updateContent',(data)=>{                        // clinet send message with room and data
+      socket.to(data.room).emit('message',data.message)   
+      console.log(data)  // server sends message to that particular room 
       logger.info("message sent from room : ",data)
     })
 
+    socket.on('newContent', () => {
+      logger.info(`Admin Client disconnected [id=${socket.id}]`);
+    });
     socket.on('disconnect', () => {
       logger.info('user disconnected');
     });
