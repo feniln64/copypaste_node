@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const Content = require('../models/model.content');
 const Subdomain = require('../models/model.subdomain');
+const User = require('../models/model.user');
 const pjson = require('../package.json');
 
 // @desc    Get all data
@@ -16,17 +17,14 @@ const initData = asyncHandler(async (req, res) => {
   }
 
   const userId = already_exist.userId;
+  const userObject = await User.findOne({ _id: userId}).lean();
+  const username = userObject.username;
   const contentObject = await Content.find({ userId, is_protected:false }).lean();
   if (!contentObject) {
     return res.status(404).json({ message: "No content found" });
   }
-  console.log(contentObject);
 
-  if (contentObject.is_protected) {
-    return res.status(401).json({ message: "Content is Protected Login to your account" });
-  }
-
-  return res.status(200).json({ "content": contentObject});
+  return res.status(200).json({ "content": contentObject,"userInfo":{"userId":userId,"username":username} });
 });
 
 // @desc    Get all data
