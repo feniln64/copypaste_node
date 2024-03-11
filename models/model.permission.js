@@ -6,22 +6,27 @@ const permissionSchema = new mongoose.Schema({
         required: true,
         ref: 'Content'
     },
-    subdoaminId: {   // owener user id 
+    owner_userId: {   // owener user id 
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'Subdomain'
+        ref: 'User'
+    },
+    owner_email: {   // owener user email 
+        type: String,
+        required: true,
+        ref: 'User'
     },
     permission_status: {  // true means active and false means inactive
         type: Boolean,
         default: true,
-        required: true
+        required: false
     },
-    permission_type: { // 0 = none ,1 = read, 2 = read and write
+    permission_type: { // 1 = read, 2 = read and write
         type: Number,
-        default: 0,
+        default: 1,
         required: true
     },
-    user_ids: {
+    user_emails: {    // email of user whome permission is given
         type: [{ type: String }],
         required: true,
         ref: 'User'

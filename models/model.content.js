@@ -17,8 +17,14 @@ const contentSchema = new mongoose.Schema({
     },
     is_protected: {
         type: Boolean,
-        default: false
-    }
+        default: false,
+        required: true
+    },
+    is_shared: {
+        type: Boolean,
+        default: false,
+        required: true
+    },
 },
     {
         timestamps: true

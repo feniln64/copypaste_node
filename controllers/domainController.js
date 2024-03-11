@@ -28,12 +28,12 @@ const createNewSubdomain = asyncHandler(async (req, res) => {
 
   const { subdomain } = req.body;
   const userId = req.params.userId;
-console.log(userId,subdomain)
+  console.log(userId, subdomain)
   if (!userId || !subdomain) {
     return res.status(400).json({ message: "userId, subdomain  are required to create subdomain" });
   }
   const count = await Subdomain.countDocuments({ userId }).exec();
-  const user = await User.findOne({ _id: userId}).lean().exec();
+  const user = await User.findOne({ _id: userId }).lean().exec();
   if (count >= 2 && !user.premium_user) {
     return res.status(409).json({ message: "User already has 2 subdomain buy premium for more subdomain" });
   }
@@ -61,36 +61,29 @@ console.log(userId,subdomain)
       return res.status(409).json({ message: "error in function" });
     });
 
-  await uploader(subdomain).then((res) => {
-    logger.info(res)
-  }).catch((err) => {
-    logger.error(err)
-    return res.status(409).json({ message: "error in upload QR " });
-  })
-
   const subdomainObject = { userId, subdomain, active: true, dns_record_id };
   const createSubdomain = Subdomain.create(subdomainObject);
 
   if (!createSubdomain) {
     return res.status(500).json({ message: "subdoamin not created" });
   }
-
+  const updatedSubdomain = await Subdomain.findOne({ subdomain }).lean().exec();
   return res.status(201).json(
     {
       message: `subdomain ${subdomain} created successfully`,
-      subdomainObject: subdomainObject
+      subdomainObject: updatedSubdomain
     });
 });
 
 const checkSubdomainAvailability = asyncHandler(async (req, res) => {
-  
+
   const userId = req.params.userId;
 
   if (!userId) {
     return res.status(400).json({ message: "userId  is required " });
   }
   const count = await Subdomain.countDocuments({ userId }).exec();
-  const user = await User.findOne({ _id: userId}).lean().exec();
+  const user = await User.findOne({ _id: userId }).lean().exec();
   if (count >= 2 && !user.premium_user) {
     return res.status(409).json({ message: "User already has 2 subdomain buy premium for more subdomain" });
   }
@@ -101,25 +94,25 @@ const checkSubdomainAvailability = asyncHandler(async (req, res) => {
 });
 
 // @desc    update subdomain
-// @route   POST /subdoamin
+// @route   POST /subdoamin/update/subdomainId
 // @access  Private || private means require token
-const updateDomain = asyncHandler(async (req, res) => {
+const updateDomainBySubdomainId = asyncHandler(async (req, res) => {
 
   const { newDomain, premium_user } = req.body;
-  const userId = req.params.userId;
+  const subdomainId = req.params.subdomainId;
 
-  if (!newDomain || typeof premium_user !== "boolean") {
+  if (!newDomain || typeof premium_user !== "boolean" || !subdomainId) {
     return res.status(400).json({ message: "User Id and New domain and premium user required.." });
   }
 
-  if (premium_user !== true) {
-    return res.status(400).json({ message: "only premium user can update domain" });
-  }
+  // if (premium_user !== true) {
+  //   return res.status(400).json({ message: "only premium user can update domain" });
+  // }
 
-  const newSubDomain = await Subdomain.findOne({ userId }).exec();
+  const newSubDomain = await Subdomain.findOne({ _id:subdomainId }).exec();
 
   if (!newSubDomain) {
-    return res.status(404).json({ message: "User not found" });
+    return res.status(404).json({ message: "Subdomain not found" });
   }
 
   const duplicate = await Subdomain.findOne({ subdomain: newDomain }).lean().exec();
@@ -137,37 +130,28 @@ const updateDomain = asyncHandler(async (req, res) => {
     "type": "CNAME",
     "comment": "CNAME for readyle.live react app",
   }
-  try {
-    cf.patch(`zones/${process.env.CLOUDFLARE_ZONE_ID}/dns_records/${subdomain_id}`, payload)
-      .then(() => {
-        newSubDomain.subdomain = newDomain;
-        const updateSubDomain = newSubDomain.save();
-        if (!updateSubDomain) {
-          return res.status(500).json({ message: "Something went wrong during updating subdomain" });
-        }
-
-        return res.status(201).json(
-          {
-            message: `subdomain ${newDomain} updated successfully`,
-            subdomainObject: newSubDomain
-          });
-      })
-      .catch((error) => {
-        return res.status(409).json({ message: "error in function" });
-
-      });
-  }
-  catch (error) {
-    if (error.response) {
-      alert(error.response.data.message);
-    }
-    else if (error.request) {
-      console.log("network error");
-    }
-    else {
-      console.log(error);
-    }
-  }
+    newSubDomain.subdomain = newDomain;
+  console.log(newSubDomain)
+  // await cf.patch(`zones/${process.env.CLOUDFLARE_ZONE_ID}/dns_records/${subdomain_id}`, payload)
+  //   .then(() => {
+  //     const updateSubDomain = newSubDomain.save();
+  //     if (!updateSubDomain) {
+  //       return res.status(500).json({ message: "Something went wrong during updating subdomain" });
+  //     }
+  //     return res.status(201).json({ message: `subdomain ${newDomain} updated successfully`, subdomainObject: newSubDomain });
+  //   })
+  //   .catch((error) => {
+  //     if (error.response) {
+  //       alert(error.response.data.message);
+  //     }
+  //     else if (error.request) {
+  //       console.log("network error");
+  //     }
+  //     else {
+  //       console.log(error);
+  //     }
+  //     return res.status(409).json({ message: "error in function" });
+  //   });
 });
 
 const getSubdomainByUserId = asyncHandler(async (req, res) => {
@@ -197,13 +181,13 @@ const deleteSubdomainByUserId = asyncHandler(async (req, res) => {
 
 const deleteSubdomainbySubdoamin = asyncHandler(async (req, res) => {
 
-  const subdomain = req.params.subdomain;
-  if (!subdomain) {
+  const subdomainId = req.params.subdomainId;
+  if (!subdomainId) {
     return res.status(400).json({ message: "subdomain is required in usr params" });
   }
-  console.log(subdomain)
+  console.log(subdomainId)
 
-  const subdomainObject = await Subdomain.findOne({ subdomain }).lean().exec();
+  const subdomainObject = await Subdomain.findOne({ _id:subdomainId }).lean().exec();
   console.log(subdomainObject)
   if (!subdomainObject) {
     return res.status(404).json({ message: "subdomain not found in database" });
@@ -219,18 +203,9 @@ const deleteSubdomainbySubdoamin = asyncHandler(async (req, res) => {
       return res.status(409).json({ message: "error deleting subdoamin from cloudflare" });
     });
 
-  await minioClient.removeObject('docopypaste', `qr/${subdomain}/${subdomain}.png`)
-    .then(() => {
-      logger.info("qr deleted successfully")
-    })
-    .catch((error) => {
-      logger.error(error)
-      return res.status(409).json({ message: "error while delete qr code from minio" });
-    });
-
-  const deleteSubdoamin = await Subdomain.deleteOne({ subdomain });
+  const deleteSubdoamin = await Subdomain.deleteOne({ _id:subdomainId });
   if (!deleteSubdoamin) {
-    return res.status(409).json({ message: "subdomain not deleted" });
+    return res.status(409).json({ message: "subdomain not deleted from database" });
   }
 
   return res.json({ "message": "subdomain deleted" });
@@ -239,7 +214,7 @@ const deleteSubdomainbySubdoamin = asyncHandler(async (req, res) => {
 module.exports = {
   getAllSubdomain,
   createNewSubdomain,
-  updateDomain,
+  updateDomainBySubdomainId,
   getSubdomainByUserId,
   deleteSubdomainByUserId,
   deleteSubdomainbySubdoamin,
