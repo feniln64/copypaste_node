@@ -21,11 +21,11 @@ const getAllContent = asyncHandler(async (req, res) => {
 // @access  Private
 const createNewContent = asyncHandler(async (req, res) => {
     console.log("createNewContent called");
-    const { content, is_protected, title } = req.body;
+    const { content, is_protected, title, is_shared } = req.body;
     const userId = req.params.userId;
 
     // check data if all correct create "contentObject"
-    if (!content || typeof is_protected !== "boolean" || !title) {
+    if (!content || typeof is_protected !== "boolean" || !title || typeof is_shared !== "boolean") {
         return res.status(400).json({ message: "content and is_protected boolean and title is required" });
     }
     const content_size = sizeof(content);
@@ -33,7 +33,7 @@ const createNewContent = asyncHandler(async (req, res) => {
     if (content_size > 28000) {
         return res.status(413).json({ message: "Content is to large" });
     }
-    const contentObject = { userId, content, is_protected, title };
+    const contentObject = { userId, content, is_protected, title, is_shared };
     const count = await Content.countDocuments({ userId }).exec();
     const user = await User.findOne({ _id: userId }).lean().exec();
 
@@ -60,11 +60,11 @@ const createNewContent = asyncHandler(async (req, res) => {
 
 const createNewContentPublic = asyncHandler(async (req, res) => {
     console.log("createNewContent public called");
-    const { content, subdomain, title } = req.body;
+    const { content, subdomain, title , is_shared} = req.body;
     const userId = req.params.userId;
 
     // check data if all correct create "contentObject"
-    if (!content || !title) {
+    if (!content || !title || !is_shared) {
         return res.status(400).json({ message: "content and is_protected boolean and title is required" });
     }
     const content_size = sizeof(content);
@@ -110,11 +110,11 @@ const getUserContent = asyncHandler(async (req, res) => {
 // @access  Private
 const updateContentByUserId = asyncHandler(async (req, res) => {
     console.log("updateUserContent called");
-    const { content, is_protected } = req.body;
+    const { content, is_protected, is_shared } = req.body;
     const userId = req.params.userId;
 
     // check data if all correct create "contentObject"
-    if (!content || typeof is_protected !== "boolean") {
+    if (!content || typeof is_protected !== "boolean" || typeof is_shared !== "boolean") {
         return res.status(400).json({ message: "content and is_protected boolean is required" });
     }
     const content_size = sizeof(content);
@@ -150,11 +150,11 @@ const updateContentByUserId = asyncHandler(async (req, res) => {
 // @access  Public
 const updateContentByContentId = asyncHandler(async (req, res) => {
     console.log("updateUserContent called");
-    const { content, is_protected, title } = req.body;
+    const { content, is_protected, title, is_shared } = req.body;
     const contentId = req.params.contentId;
 
     // check data if all correct create "contentObject"
-    if (!content || typeof is_protected !== "boolean" || !title) {
+    if (!content || typeof is_protected !== "boolean" || !title || typeof is_shared !== "boolean") {
         return res.status(400).json({ message: "content and is_protected boolean and title is required is required" });
     }
     const content_size = sizeof(content);
@@ -170,10 +170,10 @@ const updateContentByContentId = asyncHandler(async (req, res) => {
         already_exist.title = title;
 
         const update_content = await already_exist.save();
-
+        const updatedContent = await Content.findOne({ _id:contentId }).lean();
         if (!update_content) return res.status(500).json({ message: "Problem updating content" });
 
-        else return res.status(200).json({ message: `content updated successfully` });
+        else return res.status(200).json({ message: `content updated successfully`,updatedContent:updatedContent });
 
     }
     return res.status(404).json({ message: "No content found to update" });

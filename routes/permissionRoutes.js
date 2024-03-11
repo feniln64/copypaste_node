@@ -9,13 +9,10 @@ const verifyJWT = require('../middleware/verifyJWT');
 // router.route('/getcontent/:userId') // /permission/:userId
 //     .get(permissionController.getUserpermission)
 
-router.route('/create/:userId') // /permission/create/:userId
-    .post(permissionController.createNewPermission)
-
-router.route('/update/:userId') // /permission/update/:userId
-    .post(permissionController.updatePermission) 
-
-router.route('/delete/:userId') // /permission/delete/:userId
-    .delete(permissionController.deletePermission) 
+router.route('/create/:contentId').post(permissionController.createNewPermission) // /permission/create/:contentId
+router.route('/getsharedcontent/:userId').get(permissionController.getSharedContentByUserId) // /permission/getsharedcontent/:userId
+router.route('/update/:userId').post(permissionController.updatePermission)  // /permission/update/:userId
+router.route('/delete/:userId').delete(permissionController.deletePermission)  // /permission/delete/:userId
+    
 
 module.exports = router;

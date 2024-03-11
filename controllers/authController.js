@@ -32,12 +32,6 @@ const signupUser = asyncHandler(async (req, res) => {
 
 
   const userObject = { email, username, name,password }; // password will be hashed in model
-  await uploader(username).then((res) => {
-    logger.info(res)
-  }).catch((err) => {
-    logger.error(err)
-    return res.status(409).json({ message: "error in upload QR " });
-  })
 
   //#####################################################################################################################
   //###########################------------------CREATE SUBDOMAIN IN CLOUDFLARE-----------------#########################
