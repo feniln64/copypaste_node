@@ -7,7 +7,8 @@ const Qr = require('../models/model.qr');
 require('dotenv').config()
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const uploader = require('../functions/generateQR');
+const PermissionBy = require('../models/model.permissionBy');
+const permissionTo = require('../models/model.permissionTo');
 const sendMail = require('../functions/sendMail');
 const logger = require('../config/wtLogger');
 const { cf } = require('../config/imports')
@@ -81,7 +82,7 @@ const signupUser = asyncHandler(async (req, res) => {
 const login = asyncHandler(async (req, res) => {
 
   const { email, password } = req.body;
-
+  console.log(email, password)
   if (!email || !password) {
     return res.status(400).json({ message: 'Please provide email and password both' });
   }
@@ -109,6 +110,8 @@ const login = asyncHandler(async (req, res) => {
   }
   const content = await  Content.find({userId: foundUser._id}).lean();
   const subdomains = await Subdomain.find({userId: foundUser._id}).lean();
+  const shraedWithMe = await permissionTo.find({permission_to_email: foundUser.email}).lean();
+  const sharedByMe = await PermissionBy.find({owner_userId: foundUser._id}).lean();
   const accessToken = jwt.sign({"userInfo": userInfo},process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h' })
 
   const refreshToken = jwt.sign({"userInfo": userInfo},process.env.REFRESH_TOKEN_SECRET,{ expiresIn: '1d' })
@@ -121,7 +124,7 @@ const login = asyncHandler(async (req, res) => {
     maxAge: 24 * 60 * 60  //1d
   })
 
-  return res.status(200).json({ accessToken, userInfo, content, subdomains});
+  return res.status(200).json({ accessToken, userInfo, content, subdomains, shraedWithMe, sharedByMe});
 });
 
 //@desc Refresh token

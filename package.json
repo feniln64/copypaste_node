@@ -1,7 +1,7 @@
 {
   "name": "docopypaste",
-  "version": "2.5.0",
-  "description": "domain routes and UI for docopypaste",
+  "version": "2.6.0",
+  "description": "permission routes working",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

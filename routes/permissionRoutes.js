@@ -10,7 +10,7 @@ const verifyJWT = require('../middleware/verifyJWT');
 //     .get(permissionController.getUserpermission)
 
 router.route('/create/:contentId').post(permissionController.createNewPermission) // /permission/create/:contentId
-router.route('/getsharedcontent/:userId').get(permissionController.getSharedContentByUserId) // /permission/getsharedcontent/:userId
+router.route('/getsharedcontent/:userEmail').get(permissionController.getSharedContentByUserEmail) // /permission/getsharedcontent/:userId
 router.route('/update/:userId').post(permissionController.updatePermission)  // /permission/update/:userId
 router.route('/delete/:userId').delete(permissionController.deletePermission)  // /permission/delete/:userId
     

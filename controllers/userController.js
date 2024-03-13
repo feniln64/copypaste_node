@@ -4,7 +4,7 @@ const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcrypt');
 require('dotenv').config()
 require('body-parser');
-const { cf, minioClient } = require('../config/imports')
+const { cf } = require('../config/imports')
 const multer = require('multer');
 const logger = require('../config/wtLogger');
 
@@ -104,13 +104,6 @@ const getProfile = asyncHandler(async (req, res) => {
     const username = user.username;
     if (!user) return res.status(404).json({ message: "User not found" });
 
-
-    await minioClient.presignedUrl('GET', 'docopypaste', `profile/${username}/profile.png`, 24 * 60 * 60, function (err, presignedUrl) {
-        if (err) return console.log(err);
-        return res.status(200).json({ signedUrl: presignedUrl });
-    })
-
-
 });
 // @desc    update Password
 // @route   POST /user/:userId/updatePassword
@@ -172,12 +165,6 @@ const deleteUser = asyncHandler(async (req, res) => {
             const deleteSubdomain = await Subdomain.deleteOne({ dns_record_id });
             if (!deleteSubdomain) {
                 console.log("subdoamin not deleted")
-            }
-            try {
-                await minioClient.removeObject('docopypaste', `qr/${username}/${username}.png`)
-            }
-            catch (err) {
-                logger.error('Error', err)
             }
         })
         .catch((err) => {

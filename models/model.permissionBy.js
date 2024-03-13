@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const permissionSchema = new mongoose.Schema({
+const permissionBySchema = new mongoose.Schema({
     contentId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
@@ -46,4 +46,4 @@ const permissionSchema = new mongoose.Schema({
         timestamps: true
     });
 
-module.exports = mongoose.model('permission', permissionSchema)
+module.exports = mongoose.model('PermissionBy', permissionBySchema) // name in database "permissionbies"
