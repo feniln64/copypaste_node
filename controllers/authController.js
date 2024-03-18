@@ -31,8 +31,8 @@ const signupUser = asyncHandler(async (req, res) => {
     return res.status(409).json({ message: "Username is already taken" });
   }
 
-
-  const userObject = { email, username, name,password }; // password will be hashed in model
+  const password_new = bcrypt.hashSync(password, 10);
+  const userObject = { email, username, name,password:password_new }; 
 
   //#####################################################################################################################
   //###########################------------------CREATE SUBDOMAIN IN CLOUDFLARE-----------------#########################
@@ -64,14 +64,14 @@ const signupUser = asyncHandler(async (req, res) => {
   const subdomainObject = { userId: useObject._id, subdomain: username, active: true, dns_record_id };
   console.log(subdomainObject)
   const createSubdomain = await Subdomain.create(subdomainObject);
-  const createqrcode = await Qr.create({ userId: useObject._id, s3_path: `qr/${username}/${username}.png` });
-  if (!createSubdomain || !createqrcode) {
+
+  if (!createSubdomain) {
     console.log("subdoamin not created or qr not created")
   }
 
   await sendMail(email, name, username).catch((err) => {
     console.log(err)
-    return res.status(409).json({ message: "error in function" });
+    return res.status(409).json({ message: "error in sending email" });
   });
   return res.status(200).json({ message: "user created" });
 });

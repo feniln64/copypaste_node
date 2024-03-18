@@ -62,17 +62,12 @@ const createNewSubdomain = asyncHandler(async (req, res) => {
     });
 
   const subdomainObject = { userId, subdomain, active: true, dns_record_id };
-  const createSubdomain = Subdomain.create(subdomainObject);
+  const createSubdomain = await Subdomain.create(subdomainObject);
 
   if (!createSubdomain) {
     return res.status(500).json({ message: "subdoamin not created" });
   }
-  const updatedSubdomain = await Subdomain.findOne({ subdomain }).lean().exec();
-  return res.status(201).json(
-    {
-      message: `subdomain ${subdomain} created successfully`,
-      subdomainObject: updatedSubdomain
-    });
+  return res.status(201).json({  message: `subdomain ${subdomain} created successfully`,  subdomainObject: createSubdomain});
 });
 
 const checkSubdomainAvailability = asyncHandler(async (req, res) => {
