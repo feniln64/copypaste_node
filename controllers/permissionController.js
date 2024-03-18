@@ -13,106 +13,172 @@ const createNewPermission = asyncHandler(async (req, res) => {
     var permission_by_id = "";
     console.log("createNewPermission by Id called");
     // console.log(req.body);
-    const { userList, permission_current_period_end, permission_type } = req.body;
+    const { userList, permission_type } = req.body;
     const contentId = req.params.contentId;
 
 
     // check data if all correct create "contentObject"
-    if (!permission_current_period_end || !userList || !contentId || !permission_type) {
+    if ( !userList || !contentId || !permission_type) {
         return res.status(400).json({ message: "permission_current_period_end and userList required" });
     }
-    const already_exist = await PermissionBy.findOne({ contentId }).lean();
-    if (already_exist) {
-        await updatePermission(contentId, userList, permission_current_period_end, permission_type)
-            .then((result) => {
-                return res.status(201).json({ message: `permission updated successfully from update function` });
-            })
-            .catch((err) => {
-                return res.status(500).json({ message: "Something went wrong in update function" });
-            });
-        }
-        else { // create new permission
-        console.log("create new permission");
-        var contentObject = await Content.findOne({ _id: contentId }).exec();
-        const userId = contentObject.userId.toString();
-
-        const Userobject = await User.findOne({ _id: userId }).lean().select('email');
-        const email = Userobject.email;
-
-        const permissionObject = { contentId, owner_userId: userId, owner_email: email, permission_type: permission_type, user_emails: userList, permission_current_period_end };
-        const create = await PermissionBy.create(permissionObject);
-        if (!create) {
-            return res.status(500).json({ message: "permission by not created" });
-        }
-        permission_by_id = create._id;
-        console.log(permission_by_id);
+    // check permission exists for content id
+    const permission_exists = await PermissionBy.findOne ({ contentId: contentId }).exec();
+    if (permission_exists) {
+        console.log("permission exists for content id");
+        permission_exists.permission_type = permission_type;
+        permission_exists.user_emails = userList;
         for (let i = 0; i < userList.length; i++) {
-            const permissionObject = { permission_by_id,permission_to_email: userList[i] };
+            const permissionObject = { permission_by_id: permission_exists._id, permission_to_email: userList[i] };
             const create = await PermissionTo.create(permissionObject);
             if (!create) {
-                return res.status(500).json({ message: `permission for ${userList[i]} not created by ${email}` });
+                return res.status(500).json({ message: `permission for ${userList[i]} not created` });
             }
         }
-        contentObject.is_shared = true;
-        const update_content = await contentObject.save();
-
-        if (!update_content) {
-            return res.status(500).json({ message: "Problem updating content" });
+        const update_permission = await permission_exists.save();
+        if (!update_permission) {
+            return res.status(500).json({ message: "Problem updating permission" });
         }
-        return res.status(201).json({ message: `permission created successfully` });
+        return res.status(201).json({ message: `permission updated successfully` });
     }
+    // create new permission
+    console.log("create new permission");
+    var contentObject = await Content.findOne({ _id: contentId }).exec();
+    if (!contentObject) {
+        return res.status(404).json({ message: "content not found to give permission" });
+    }
+    const userId = contentObject.userId.toString();
+
+    const Userobject = await User.findOne({ _id: userId }).lean().select('email');
+    const email = Userobject.email;
+
+    const permissionObject = { contentId, owner_userId: userId, owner_email: email, permission_type: permission_type, user_emails: userList };
+    const create = await PermissionBy.create(permissionObject);
+    if (!create) {
+        return res.status(500).json({ message: "permission by not created" });
+    }
+    permission_by_id = create._id;
+    console.log(permission_by_id);
+    for (let i = 0; i < userList.length; i++) {
+        const permissionObject = { permission_by_id, permission_to_email: userList[i] };
+        const create = await PermissionTo.create(permissionObject);
+        if (!create) {
+            return res.status(500).json({ message: `permission for ${userList[i]} not created by ${email}` });
+        }
+    }
+    contentObject.is_shared = true;
+    const update_content = await contentObject.save();
+
+    if (!update_content) {
+        return res.status(500).json({ message: "Problem updating content" });
+    }
+    return res.status(201).json({ message: `permission created successfully`,sharedbyMe: create });
+
 });
 
 // @desc    create content
-// @route   POST /content/update/:userId
+// @route   PATCH /permission/update/:permissionId  
 // @access  Private
-const updatePermission = async (contentId, userList, permission_current_period_end, permission_type) => {
-    return new Response("updatePermission by Id called")
-}
+const updatePermission = asyncHandler(async (req, res) => {
+    const permissionId = req.params.permissionId;
+    const { userList, permission_current_period_end, permission_type } = req.body;
+    const contentId = req.params.contentId;
+    console.log("updatePermission by Id called");
+    // check data if all correct create "contentObject"
+    if (!permission_current_period_end || !userList || !contentId || !permission_type || permissionId) {
+        return res.status(400).json({ message: "permission_current_period_end and userList required" });
+    }
 
+    const permission_object = await PermissionBy.findOne({ _id: permissionId }).exec();
+    if (!permission_object) {
+        return res.status(404).json({ message: "permission not found" });
+    }
+
+    permission_object.permission_current_period_end = permission_current_period_end;
+    permission_object.permission_type = permission_type;
+    permission_object.user_emails = userList;
+
+    const update_permission = await permission_object.save();
+    if (!update_permission) {
+        return res.status(500).json({ message: "Problem updating permission" });
+    }
+    return res.status(201).json({ message: `permission updated successfully` });
+
+})
+
+// @desc    delete permission by permissionId
+// @route   DELETE /permission/delete/:permissionId
+// @access  Private
+const deletePermissionByPermissionId = asyncHandler(async (req, res) => {
+    const permissionId = req.params.permissionId;
+    console.log("deletePermissionByPermissionId called");
+    const permission_object = await PermissionBy.findOne({ _id: permissionId }).exec();
+    if (!permission_object) {
+        return res.status(404).json({ message: "permission not found" });
+    }
+    const permission_to_object = await PermissionTo.deleteMany({ permission_by_id: permissionId }).exec();
+    if (!permission_to_object) {
+        return res.status(500).json({ message: "Problem deleting permission" });
+    }
+    const delete_permission = await PermissionBy.deleteOne({ _id: permissionId }).exec();
+    if (!delete_permission) {
+        return res.status(500).json({ message: "Problem deleting permission" });
+    }
+    return res.status(201).json({ message: `permission deleted successfully` });
+});
+
+// @desc    get shared content by user email
+// @route   GET /permission/getSharedContentByUserEmail/:userEmail
+// @access  Private
 const getSharedContentByUserEmail = asyncHandler(async (req, res) => {  // check  if i have permission to any content
     console.log("getSharedContentByUserId called");
     const emailId = req.params.userEmail;
-    const sharedContentIds = [];
+    const sharedContent = [];
     const userpermission = await PermissionTo.find({ permission_to_email: emailId }).lean().exec();  /// check if user has permission to access content
     if (userpermission.length == 0) {
         return res.status(404).json({ message: "no shared content with you" });
     }
-    
+
     for (let i = 0; i < userpermission.length; i++) {
-        const contentObject=await PermissionBy.find({ _id: userpermission[i].permission_by_id}).lean().exec();
-        const id=contentObject[0].contentId.toString();
-        sharedContentIds.push(id);
-    }
-    const sharedContent = await Content.find({ _id: { $in: sharedContentIds } }).lean().exec();
-    if (sharedContent.length == 0) {
-        return res.status(404).json({ message: "permission exists but no shared content found with you" });
+        const contentObject = await PermissionBy.find({ _id: userpermission[i].permission_by_id }).lean().exec();
+        const id = contentObject[0].contentId.toString();
+        const type = contentObject[0].permission_type;
+        const sharedContentObject = await Content.find({ _id: id }).lean().exec();
+        if (sharedContentObject.length == 0) {
+            return res.status(404).json({ message: "permission exists but no shared content found with you" });
+        }
+        sharedContentObject[0].permission_type = type;
+        sharedContent.push( sharedContentObject[0] );
     }
     return res.status(201).json({ message: `shared content fetched successfully`, sharedContent });
 
 });
-// @desc    create content
-// @route   DELETE /content/update/:userId
-// @access  Private
-const deletePermission = asyncHandler(async (req, res) => {
-    const userId = req.params.userId;
 
-    // check if content already exists the update content with new values
-    const already_exist = await Content.findOne({ userId }).lean();
 
-    if (already_exist) {
-        const update_content = await Content.deleteOne({ userId });
-        if (!update_content) {
-            return res.status(500).json({ message: "Problem deleting content" });
-        } else {
-            return res.status(201).json({ message: `content deleted successfully` });
-        }
+const deletePermissionByContentId = asyncHandler(async (req, res) => {
+    const contentId = req.params.contentId;
+    const emailId = req.params.emailId;
+    if (!contentId || !emailId) {
+        return res.status(400).json({ message: "contentId and emailId required in params" });
     }
+    console.log("deletePermissionByContentId called");
+    const permission_object = await PermissionBy.findOne({ contentId: contentId }).exec();
+    if (!permission_object) {
+        return res.status(404).json({ message: "permission not found" });
+    }
+    const permission_to_object = await PermissionTo.deleteMany({ permission_by_id: permission_object._id, permission_to_email: emailId }).exec();
+    if (!permission_to_object) {
+        return res.status(500).json({ message: "Problem deleting permission" });
+    }
+    const delete_permission = await PermissionBy.deleteOne({ contentId: contentId }).exec();
+    if (!delete_permission) {
+        return res.status(500).json({ message: "Problem deleting permission" });
+    }
+    return res.status(201).json({ message: `permission deleted successfully` });
 });
-
 module.exports = {
     createNewPermission,
     updatePermission,
-    deletePermission,
-    getSharedContentByUserEmail
+    deletePermissionByPermissionId,
+    getSharedContentByUserEmail,
+    deletePermissionByContentId
 };

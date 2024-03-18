@@ -52,9 +52,11 @@ io.on('connection', (socket) => {
       logger.info("message sent from room : ",data)
     })
 
-    socket.on('newContent', () => {
-      logger.info(`Admin Client disconnected [id=${socket.id}]`);
+    socket.on('newcontent', (data) => {
+      logger.info('newcontent socket called');
+      socket.to(data.room).emit('newcontent',data.message);
     });
+
     socket.on('disconnect', () => {
       logger.info('user disconnected');
     });
