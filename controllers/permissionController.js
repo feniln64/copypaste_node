@@ -133,15 +133,14 @@ const getSharedContentByUserEmail = asyncHandler(async (req, res) => {  // check
     console.log("getSharedContentByUserId called");
     const emailId = req.params.userEmail;
     const sharedContent = [];
-    const userpermission = await PermissionTo.find({ permission_to_email: emailId }).lean().exec();  /// check if user has permission to access content
+    const userpermission = await PermissionBy.find({ user_emails: emailId }).lean().exec();  /// check if user has permission to access content
     if (userpermission.length == 0) {
         return res.status(404).json({ message: "no shared content with you" });
     }
-
+    console.log(userpermission);
     for (let i = 0; i < userpermission.length; i++) {
-        const contentObject = await PermissionBy.find({ _id: userpermission[i].permission_by_id }).lean().exec();
-        const id = contentObject[0].contentId.toString();
-        const type = contentObject[0].permission_type;
+        const id = userpermission[i].contentId.toString();
+        const type = userpermission[i].permission_type;
         const sharedContentObject = await Content.find({ _id: id }).lean().exec();
         if (sharedContentObject.length == 0) {
             return res.status(404).json({ message: "permission exists but no shared content found with you" });
