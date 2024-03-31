@@ -3,6 +3,9 @@ const Content = require('../models/model.content');
 const Subdomain = require('../models/model.subdomain');
 const User = require('../models/model.user');
 const pjson = require('../package.json');
+const si = require('systeminformation');
+
+// promises style - new since version 3
 
 // @desc    Get all data
 // @route   GET /init/:subdomain
@@ -58,8 +61,20 @@ const versionCheck = asyncHandler(async (req, res) => {
   return res.status(200).json({ version: pjson.version,description: pjson.description});
 });
 
+const systeminformation = asyncHandler(async (req, res) => {
+  console.log("systeminformation route hit");
+  try {
+    const data = await si.getStaticData();
+    const memory = ((await si.mem()).total)/1024/1024/1024;
+    return res.status(200).json({"cpu":data.cpu.cores,"memory":memory});
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 module.exports = {
   initData,
   getDns,
-  versionCheck
+  versionCheck,
+  systeminformation
 }
