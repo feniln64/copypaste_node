@@ -130,14 +130,12 @@ const deletePermissionByPermissionId = asyncHandler(async (req, res) => {
 // @route   GET /permission/getSharedContentByUserEmail/:userEmail
 // @access  Private
 const getSharedContentByUserEmail = asyncHandler(async (req, res) => {  // check  if i have permission to any content
-    console.log("getSharedContentByUserId called");
     const emailId = req.params.userEmail;
     const sharedContent = [];
     const userpermission = await PermissionBy.find({ user_emails: emailId }).lean().exec();  /// check if user has permission to access content
     if (userpermission.length == 0) {
         return res.status(404).json({ message: "no shared content with you" });
     }
-    console.log(userpermission);
     for (let i = 0; i < userpermission.length; i++) {
         const id = userpermission[i].contentId.toString();
         const type = userpermission[i].permission_type;

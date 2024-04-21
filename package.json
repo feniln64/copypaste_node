@@ -1,7 +1,7 @@
 {
   "name": "docopypaste",
-  "version": "2.7.1",
-  "description": "minor permission routes updated and socket",
+  "version": "2.7.5",
+  "description": "shared content upodate",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

@@ -93,10 +93,7 @@ const createNewContentPublic = asyncHandler(async (req, res) => {
 // @route   GET /content/getcontent/:userId
 // @access  Private
 const getUserContent = asyncHandler(async (req, res) => {
-    console.log("getUserContent called");
     const userId = req.params.userId; //doimain.com/users/email(value of email)
-    console.log(userId);
-
     
     if (!userId) {
         return res.status(400).json({ message: "userId is required in params" });
@@ -221,9 +218,69 @@ const updateContentByContentIdPublic = asyncHandler(async (req, res) => {
 
 });
 
-// // @desc    create content
-// // @route   DELETE /content/update/:contentId
-// // @access  Private
+// @desc    update shared content
+// @route   POST /update/shared/:contentId
+// @access  Public
+const updateSharedContent = asyncHandler(async (req, res) => {
+    console.log("updateSharedContent called");
+    const {content, is_protected, title, current_user } = req.body;
+    const contentId = req.params.contentId;
+    console.log(contentId);
+
+    // check data if all correct create "contentObject"
+    if (!content || typeof is_protected !== "boolean" || !title || !current_user) {
+        return res.status(400).json({ message: "content and is_protected boolean and title and current user email is required is required" });
+    }
+    const content_size = sizeof(content);
+    if (content_size > 28000) {
+        return res.status(413).json({ message: "Content is to large" });
+    }
+    // check if content already exists the update content with new values
+    const already_exist = await Content.findOne({ _id: contentId }).exec();
+
+    if (already_exist) {
+
+        // check curent user has permission to update content
+        const permissionByContentId = await PermissionBy.findOne({ contentId }).lean().exec();
+        if (!permissionByContentId) {
+            return res.status(404).json({ message: "No permission found to update" });
+        }        
+        // check current user email is in permissionby.user_emails
+        if (permissionByContentId.user_emails.includes(current_user)) {
+            console.log("user is in permission by");
+            already_exist.content = content;
+            already_exist.is_protected = is_protected;
+            already_exist.title = title;
+            const update_content = await already_exist.save();
+            if (!update_content) return res.status(500).json({ message: "Problem updating content" });
+
+            else return res.status(200).json({ message: `content updated successfully` });
+            
+        }
+
+        else return res.status(401).json({ message: `user does not have permission to update` });
+
+    }
+
+    // // check if content already exists the update content with new values
+    // const already_exist = await Content.findOne({ _id: contentId }).exec();
+
+    // if (already_exist) {
+    //     already_exist.is_shared = is_shared;
+
+    //     const update_content = await already_exist.save();
+    //     if (!update_content) return res.status(500).json({ message: "Problem updating content" });
+
+    //     else return res.status(200).json({ message: `content updated successfully` });
+
+    // }
+    return res.status(404).json({ message: "No content found to update" });
+
+});
+
+// @desc    create content
+// @route   DELETE /content/update/:contentId
+// @access  Private
 const deleteContentByContentId = asyncHandler(async (req, res) => {
 
     const contentId = req.params.contentId;
@@ -269,6 +326,7 @@ module.exports = {
     updateContentByUserId,
     updateContentByContentId,
     updateContentByContentIdPublic,
+    updateSharedContent,
     // deleteUserContent,
     createNewContentPublic,
     deleteContentByContentId

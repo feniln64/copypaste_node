@@ -96,7 +96,6 @@ const updateProfileImage = asyncHandler(async (req, res) => {
 
 const getProfile = asyncHandler(async (req, res) => {
 
-    console.log("get user profile image by userid called")
     const userId = req.params.userId
     if (!userId) return res.status(400).json({ message: "Email, Name and Username is required" });
 
