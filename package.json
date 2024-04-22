@@ -1,6 +1,6 @@
 {
   "name": "docopypaste",
-  "version": "2.7.5",
+  "version": "2.7.6",
   "description": "shared content upodate",
   "main": "server.js",
   "scripts": {
