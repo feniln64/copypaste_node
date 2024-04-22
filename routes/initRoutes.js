@@ -8,5 +8,4 @@ router.route('/dns').get(logging,initDataController.getDns);
 router.route('/version').get(logging,initDataController.versionCheck);
 router.route('/systeminfo').get(logging,initDataController.systeminformation);
 
-
 module.exports = router;
