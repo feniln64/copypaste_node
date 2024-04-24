@@ -1,11 +1,9 @@
-const { default: axios } = require('axios');
 const Subdomain = require('../models/model.subdomain');
 const User = require('../models/model.user');
 const asyncHandler = require('express-async-handler');
-const uploader = require('../functions/generateQR');
 require('body-parser');
 require('dotenv').config();
-const { cf, minioClient } = require('../config/imports');
+const { cf } = require('../config/imports');
 const logger = require('../config/wtLogger');
 
 // @desc    Get all subdoamins

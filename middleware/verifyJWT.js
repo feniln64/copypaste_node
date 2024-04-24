@@ -5,18 +5,18 @@ const verifyJWT = (req, res, next) => {
     const authHeader = req.headers.authorization || req.headers.Authorization;
 
     if (!authHeader?.startsWith('Bearer ')) {
-        return res.status(401).send('Unauthorized! Need access token');
+        return res.status(401).json({message:'Unauthorized! Need access token'});
     }
 
     const token = authHeader.split(' ')[1];
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
         if (err) {
-            return res.status(403).send('Forbidden! Access token expired');
+            return res.status(403).json({message:'Forbidden! Access token expired'});
         }
-        req.user = decoded.UserInfo.username;
-        req.email = decoded.UserInfo.email;
-        req.roles = decoded.UserInfo.roles;
-        req.premium_user = decoded.UserInfo.premium_user;
+        req.user = decoded.userInfo.username;
+        req.email = decoded.userInfo.email;
+        req.roles = decoded.userInfo.roles;
+        req.premium_user = decoded.userInfo.premium_user;
         next();
     });
 }

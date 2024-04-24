@@ -10,7 +10,6 @@ const subdomainRoute = require('./routes/subdomainRoute');
 const initRoutes = require('./routes/initRoutes');
 const contentRoutes = require('./routes/contentRoutes');
 const permissionRoutes = require('./routes/permissionRoutes');
-const fileupload = require("express-fileupload");
 const logger = require('./config/wtLogger');
 var bodyParser = require('body-parser');
 const pjson = require('./package.json');
@@ -20,7 +19,6 @@ const app = express();
 const httpServer = createServer(app);
 require('dotenv').config
 
-app.use(fileupload());
 app.use(cors(corsOptions))
 app.use(cookieParser());
 app.use(bodyParser.json({limit: '50mb'}));

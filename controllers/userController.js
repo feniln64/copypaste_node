@@ -5,37 +5,9 @@ const bcrypt = require('bcrypt');
 require('dotenv').config()
 require('body-parser');
 const { cf } = require('../config/imports')
-const multer = require('multer');
 const logger = require('../config/wtLogger');
 
-var storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/')
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '-' + file.originalname)
-    }
-})
 
-var upload = multer({ storage: storage })
-
-// var Minio = require('minio')
-// const { default: axios } = require('axios');
-
-// const cf = axios.create({
-//     baseURL: 'https://api.cloudflare.com/client/v4'
-// });
-// cf.defaults.headers.common["x-auth-key"] = "721d500a5a04d543e57d3a2c17e4bbe1036f2";
-// cf.defaults.headers.common["X-Auth-Email"] = "fenilnakrani39@gmail.com";
-
-
-// var minioClient = new Minio.Client({
-//   endPoint: '207.211.187.125',
-//   port: 9000,
-//   useSSL: false,
-//   accessKey: 'pPAzlk6rv4x34C6GoJEd',
-//   secretKey: 'aYuVmUYJonn7ESKAcDOop1O2dEca0v3RipG3FUUx',
-// })
 // @desc    Get all users
 // @route   GET /users
 // @access  Private
@@ -97,12 +69,12 @@ const updateProfileImage = asyncHandler(async (req, res) => {
 const getProfile = asyncHandler(async (req, res) => {
 
     const userId = req.params.userId
-    if (!userId) return res.status(400).json({ message: "Email, Name and Username is required" });
+    if (!userId) return res.status(400).json({ message: "userid in request is required" });
 
     const user = await User.findById({ _id: userId }).exec();
-    const username = user.username;
     if (!user) return res.status(404).json({ message: "User not found" });
-
+    
+    return res.status(200).json({ message: user});
 });
 // @desc    update Password
 // @route   POST /user/:userId/updatePassword
@@ -178,7 +150,9 @@ const getUser = asyncHandler(async (req, res) => {
 
     const userId = req.params.userId;
     const user = await User.findOne({ userId }).lean().exec();
-
+    if (!user) {
+        return res.status(404).json({ message: "No user found" });
+    }
     return res.status(200).json({ message: user });
 });
 

@@ -113,18 +113,9 @@ const login = asyncHandler(async (req, res) => {
   const shraedWithMe = await permissionTo.find({permission_to_email: foundUser.email}).lean();
   const sharedByMe = await PermissionBy.find({owner_userId: foundUser._id}).lean();
   const accessToken = jwt.sign({"userInfo": userInfo},process.env.ACCESS_TOKEN_SECRET,{ expiresIn: '1h' })
-
   const refreshToken = jwt.sign({"userInfo": userInfo},process.env.REFRESH_TOKEN_SECRET,{ expiresIn: '1d' })
 
-  //create cookie wih refresh token
-  res.cookie('jwt', refreshToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'None',
-    maxAge: 24 * 60 * 60  //1d
-  })
-
-  return res.status(200).json({ accessToken, userInfo, content, subdomains, shraedWithMe, sharedByMe});
+  return res.status(200).json({ accessToken,refreshToken, userInfo, content, subdomains, shraedWithMe, sharedByMe});
 });
 
 //@desc Refresh token
@@ -132,21 +123,19 @@ const login = asyncHandler(async (req, res) => {
 //@access public
 const refresh = (req, res) => {
 
-  const cookies = req.cookies;
-
-  if (!cookies?.jwt) {
-    return res.status(401).json({ message: 'Unauthenticated' })
+  const {refreshToken} = req.body;
+  if (!refreshToken) {
+    return res.status(401).json({ message: 'refesh token not found in body' })
   }
-  const refreshToken = cookies.jwt;
   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, asyncHandler(async (err, decoded) => {
     if (err) {
-      return res.status(401).json({ message: 'Unauthenticated' })
+      return res.status(401).json({ message: 'refreshtoken is not signed by this server' })
     }
 
-    const foundUser = await User.findOne({ email: decoded.UserInfo.email });
+    const foundUser = await User.findOne({ email: decoded.userInfo.email });
 
     if (!foundUser) {
-      return res.status(401).json({ message: 'Unauthenticated' });
+      return res.status(401).json({ message: 'user not found' });
     }
 
     const userInfo = {

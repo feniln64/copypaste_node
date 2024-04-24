@@ -27,6 +27,16 @@ const createNewContent = asyncHandler(async (req, res) => {
     const { content, is_protected, title, is_shared } = req.body;
     const userId = req.params.userId;
 
+    if (!userId) {
+        return res.status(400).json({ message: "userId is required in params" });
+    }
+    
+    //checl if user exists
+    const user = await User.findOne({ _id: userId }).lean().exec();
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
     // check data if all correct create "contentObject"
     if (!content || typeof is_protected !== "boolean" || !title || typeof is_shared !== "boolean") {
         return res.status(400).json({ message: "content and is_protected boolean and title is required" });
@@ -38,7 +48,6 @@ const createNewContent = asyncHandler(async (req, res) => {
     }
     const contentObject = { userId, content, is_protected, title, is_shared };
     const count = await Content.countDocuments({ userId }).exec();
-    const user = await User.findOne({ _id: userId }).lean().exec();
 
     if (count >= 5 && !user.premium_user) {
         return res.status(409).json({ message: "User already has 5 Content buy premium for more Content" });
@@ -66,6 +75,16 @@ const createNewContentPublic = asyncHandler(async (req, res) => {
     const { content, subdomain, title, is_shared } = req.body;
     const userId = req.params.userId;
 
+    if (!userId) {
+        return res.status(400).json({ message: "userId is required in params" });
+    }
+
+    //checl if user exists
+    const user = await User.findOne({ _id: userId }).lean().exec();
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
     // check data if all correct create "contentObject"
     if (!content || !title || !is_shared) {
         return res.status(400).json({ message: "content and is_protected boolean and title is required" });
@@ -77,7 +96,10 @@ const createNewContentPublic = asyncHandler(async (req, res) => {
     }
     const contentObject = { userId, content, is_protected: false, title };
     const count = await Content.countDocuments({ userId }).exec();
-    const user = await User.findOne({ _id: userId }).lean().exec();
+
+    if (count >= 5 && !user.premium_user) {
+        return res.status(409).json({ message: "User already has 5 Content buy premium for more Content" });
+    }
 
     const createContent = await Content.create(contentObject);
     const alldata = await Content.find({ userId: userId, is_protected: false }).lean();
@@ -98,6 +120,13 @@ const getUserContent = asyncHandler(async (req, res) => {
     if (!userId) {
         return res.status(400).json({ message: "userId is required in params" });
     }
+
+    // check if user exists
+    const user = await User.findOne({ _id: userId }).lean().exec();
+    if (!user) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
     const sharedByMe = await PermissionBy.find({owner_userId: userId}).lean().exec() || [];
 
     const already_exist = await Content.find({ userId }).lean();

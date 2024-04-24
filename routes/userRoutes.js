@@ -10,7 +10,7 @@ router.route('/all')
 
 router.route('/updateuser/:userId').patch(logging, userController.updateUser);
 router.route('/updateProfileImage/:userId').post( logging,userController.updateProfileImage);
-router.route('/getProfile/:userId').get(logging,userController.getProfile)
+router.route('/getProfile/:userId').get(logging,verifyJWT,userController.getProfile)
 router.route('/updatePassword/:userId').patch(logging, userController.updatePassword);
 router.route('/profile/:userId').get(logging, userController.getUser);
 router.route('/delete/:email').delete( logging,userController.deleteUser);
