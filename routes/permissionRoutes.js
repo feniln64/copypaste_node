@@ -9,11 +9,11 @@ const logging = require('../middleware/logging')
 // router.route('/getcontent/:userId') // /permission/:userId
 //     .get(permissionController.getUserpermission)
 
-router.route('/create/:contentId').post(logging,permissionController.createNewPermission) // /permission/create/:contentId
-router.route('/shared/withme/:userEmail').get(logging,permissionController.getSharedContentByUserEmail) // /permission/getsharedcontent/:userId
-router.route('/update/:permissionId').patch(logging,permissionController.updatePermission)  // /permission/update/:userId
-router.route('/delete/:permissionId').delete(logging,permissionController.deletePermissionByPermissionId)  // /permission/delete/:permissionId
-router.route('/delete/:emailId/:contentId').delete(logging,permissionController.deletePermissionByContentId)  // /permission/delete/:permissionId
+router.route('/create/:contentId').post(logging,verifyJWT,permissionController.createNewPermission) // /permission/create/:contentId
+router.route('/shared/withme/:userEmail').get(logging,verifyJWT,permissionController.getSharedContentByUserEmail) // /permission/getsharedcontent/:userId
+router.route('/update/:permissionId').patch(logging,verifyJWT,permissionController.updatePermission)  // /permission/update/:userId
+router.route('/delete/:permissionId').delete(logging,verifyJWT,permissionController.deletePermissionByPermissionId)  // /permission/delete/:permissionId
+router.route('/delete/:emailId/:contentId').delete(logging,verifyJWT,permissionController.deletePermissionByContentId)  // /permission/delete/:permissionId
 
 
 module.exports = router;

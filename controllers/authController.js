@@ -9,9 +9,10 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const PermissionBy = require('../models/model.permissionBy');
 const permissionTo = require('../models/model.permissionTo');
-const sendMail = require('../functions/sendMail');
+const sendMail = require('../functions/createUserMail');
 const logger = require('../config/wtLogger');
 const { cf } = require('../config/imports')
+const forgotPasswordMail = require('../functions/forgotPasswordMail');
 
 
 const signupUser = asyncHandler(async (req, res) => {
@@ -185,22 +186,25 @@ const forgotPassword = asyncHandler(async (req, res) => {
   const foundUser = await User.findOne({ email });
 
   if (!foundUser || !foundUser.active) {
-    res.status(401).json({ message: 'User not found' });
+    res.status(401).json({ message: 'User not found with entered email' });
   }
 
   const resetToken = foundUser.getResetPasswordToken();
   await foundUser.save();
 
-  const requestUrl = `${req.protocol}://${req.get('host')}/resetPassword/${resetToken}`;
-
-  res.status(200).json({ message: 'OK', requestUrl: requestUrl });
+  const requestUrl = `${process.env.BASE_URL}/reset-password/${resetToken}`;
+  await forgotPasswordMail(email, url=requestUrl).catch((err) => {
+    console.log(err)
+    return res.status(409).json({ message: "error in sending email" });
+  });
+  res.status(200).json({ message: 'email sent to registered email', requestUrl: requestUrl });
 });
 
 //@desc Reset Password
 //@route POST /auth/reset-password/:resetPasswordToken
 //@access public
 const resetPassword = asyncHandler(async (req, res) => {
-
+  const { password } = req.body;
   const resetPasswordToken = crypto.createHash('sha256').update(req.params.resetPasswordToken).digest('hex');
 
   const user = await User.findOne({ resetPasswordToken, resetPasswordExpire: { $gt: Date.now() } });
@@ -208,7 +212,7 @@ const resetPassword = asyncHandler(async (req, res) => {
     res.status(401).json({ message: 'Invalid token' });
   }
 
-  user.password = req.body.password;
+  user.password = bcrypt.hashSync(password, 10);
   user.resetPasswordExpire = undefined;
   user.resetPasswordToken = undefined;
 
@@ -238,7 +242,7 @@ const updatePassword = asyncHandler(async (req, res) => {
     res.status(401).json({ message: 'current password is wrong' });
   }
 
-  user.password = newPassword;
+  user.password = bcrypt.hashSync(newPassword, 10);
 
   const newUser=await user.save();
   if (!newUser) {
