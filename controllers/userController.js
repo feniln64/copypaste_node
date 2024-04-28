@@ -6,7 +6,7 @@ require('dotenv').config()
 require('body-parser');
 const { cf } = require('../config/imports')
 const logger = require('../config/wtLogger');
-
+const contactUsMail = require('../functions/contactUsMail');
 
 // @desc    Get all users
 // @route   GET /users
@@ -146,6 +146,23 @@ const deleteUser = asyncHandler(async (req, res) => {
     return res.status(200).json({ message: "user deleted" });
 });
 
+// @desc    Get user
+// @route   GET /user/:userId
+// @access  Public
+const contactUs = asyncHandler(async (req, res) => {
+
+    const { name, email, message } = req.body;
+    if (!name || !email || !message) {
+        return res.status(400).json({ message: "All fields are required" });
+    }
+
+    contactUsMail(email, name,message).catch(console.error);
+
+    return res.status(200).json({ message: "Mail sent successfully" });
+
+});
+
+
 const getUser = asyncHandler(async (req, res) => {
 
     const userId = req.params.userId;
@@ -163,5 +180,6 @@ module.exports = {
     getUser,
     updatePassword,
     updateProfileImage,
-    getProfile
+    getProfile,
+    contactUs
 }

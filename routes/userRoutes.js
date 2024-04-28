@@ -14,5 +14,6 @@ router.route('/getProfile/:userId').get(logging,verifyJWT,userController.getProf
 router.route('/updatePassword/:userId').patch(logging, userController.updatePassword);
 router.route('/profile/:userId').get(logging, userController.getUser);
 router.route('/delete/:email').delete( logging,userController.deleteUser);
+router.route('/contact-us').post(logging, userController.contactUs);
 
 module.exports = router;
