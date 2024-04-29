@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
 const sendMail = async (email, name, username) => {
   const emailVarifyToken = jwt.sign(
     {
-      "UserInfo": {
+      "userInfo": {
 
         "username": username,
         "email": email,
@@ -320,7 +320,7 @@ const sendMail = async (email, name, username) => {
                                           color: #ffffff;
                                           display: block;
                                           padding: 0;
-                                        "><a href="${BASE_URL}/auth/varify/email/${emailVarifyToken}" style="text-decoration: none; color:white">
+                                        "><a href="${BASE_URL}/varify-email/${emailVarifyToken}" style="text-decoration: none; color:white">
                                         Activate your account
                                         </a>
   

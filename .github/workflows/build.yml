@@ -1,7 +1,7 @@
 name: Docker
 on:
   push:
-    branches: ['dev']
+    branches: ['dev','main']
 jobs:
   # docker-build-push:
   #   runs-on: self-hosted
@@ -34,17 +34,21 @@ jobs:
       #     push: true
       #     tags: registry.gitlab.com/do-copypaste/copypaste_node:latest
   
-  # deploy:
-  #   needs: docker-build-push
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: multiple command
-  #     uses: appleboy/ssh-action@v0.1.10
-  #     with:
-  #       host: node.readyle.live
-  #       username: ubuntu
-  #       key: ${{ secrets.SSH_KEY }}
-  #       port: 22
-  #       script: |
-  #         whoami
-  #         ls -al
+  deploy:
+    # needs: docker-build-push
+    runs-on: ubuntu-latest
+    steps:
+    - name: multiple command
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ubuntu
+        key: ${{ secrets.SSH_KEY }}
+        port: 22
+        script: |
+          ls -al
+          cd copypaste_node
+          ls
+          git pull
+          docker compose up -d --build
+          docker image prune -f

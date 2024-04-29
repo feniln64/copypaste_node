@@ -1,7 +1,7 @@
 {
   "name": "docopypaste",
-  "version": "2.7.8",
-  "description": "contact us form",
+  "version": "2.7.9",
+  "description": "email varification",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
