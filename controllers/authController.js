@@ -261,13 +261,15 @@ const varifyEmail = asyncHandler(async (req, res) => {
     token,
     process.env.ACCESS_TOKEN_SECRET,
     (err, decoded) => {
-      if (err) return res.status(403).json({ message: 'Forbidden! Access token expired' })
-
-      if (decoded) return true;
-
+      if (err) {
+        return false
+      }
+      return true
+      
     })
+    
   if (varify) {
-    const { username, email } = jwt.decode(token).UserInfo
+    const { username, email } = jwt.decode(token).userInfo ;
     const user = await User.findOne({ email: email });
     if (!user) return res.status(401).json({ message: 'User not found' })
 
@@ -275,8 +277,32 @@ const varifyEmail = asyncHandler(async (req, res) => {
     await user.save();
     return res.status(200).json({ message: 'Email varified successfully' })
   }
+  else{
+    return res.status(401).json({ message: 'Invalid token' })
+  }
 
   res.status(200).json({ message: 'something went wrong' })
+});
+
+const resendEmail = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    res.status(400).json({ message: 'Please enter email' });
+  }
+
+  const foundUser = await User.findOne({ email });
+
+  if (!foundUser || foundUser.active) {
+    res.status(401).json({ message: 'User not found with entered email' });
+  }
+
+  const token = jwt.sign({ UserInfo: { email: foundUser.email, username: foundUser.username } }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
+  const requestUrl = `${process.env.BASE_URL}/varify-email/${token}`;
+  await sendMail(email, foundUser.name, foundUser.username).catch((err) => {
+    console.log(err)
+    return res.status(409).json({ message: "error in sending email" });
+  });
+  res.status(200).json({ message: 'email sent to registered email', requestUrl: requestUrl });
 });
 
 module.exports = {
@@ -288,5 +314,6 @@ module.exports = {
   resetPassword,
   updatePassword,
   varifyEmail,
-  version
+  version,
+  resendEmail
 }

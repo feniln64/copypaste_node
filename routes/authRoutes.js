@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {signupUser, login, refresh, logout, forgotPassword, resetPassword,varifyEmail,updatePassword} = require('../controllers/authController');
+const {signupUser, login, refresh, logout, forgotPassword, resetPassword,varifyEmail,updatePassword,resendEmail} = require('../controllers/authController');
 const loginLimiter = require('../middleware/loginLimiter');
 const getIP = require('../middleware/getIP');
 const logging =require('../middleware/logging');
@@ -13,4 +13,6 @@ router.route('/forgot-password').post(logging,forgotPassword);                  
 router.route('/reset-password/:resetPasswordToken').post(logging,resetPassword);        // /auth/reset-password/:resetPasswordToken
 router.route('/update-password/:userId').patch(logging,updatePassword);         // /auth/update-password/:userId
 router.route('/varify/email/:token').get(logging,varifyEmail);              // /auth/varify/email/:token
+router.route('/auth/resend/email').post(logging,resendEmail);                    // /auth/resend/email
+
 module.exports = router;
