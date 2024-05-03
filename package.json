@@ -1,7 +1,7 @@
 {
   "name": "docopypaste",
-  "version": "2.7.9",
-  "description": "email varification",
+  "version": "2.8.0",
+  "description": "updates and elete permission",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

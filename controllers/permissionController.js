@@ -19,7 +19,7 @@ const createNewPermission = asyncHandler(async (req, res) => {
 
     // check data if all correct create "contentObject"
     if ( !userList || !contentId || !permission_type) {
-        return res.status(400).json({ message: "permission_current_period_end and userList required" });
+        return res.status(400).json({ message: "permission type and userList required" });
     }
     // check permission exists for content id
     const permission_exists = await PermissionBy.findOne ({ contentId: contentId }).exec();
@@ -35,10 +35,11 @@ const createNewPermission = asyncHandler(async (req, res) => {
             }
         }
         const update_permission = await permission_exists.save();
+        const all_permissions = await PermissionBy.find({ owner_email: permission_exists.owner_email }).exec();
         if (!update_permission) {
             return res.status(500).json({ message: "Problem updating permission" });
         }
-        return res.status(201).json({ message: `permission updated successfully` });
+        return res.status(201).json({ message: `permission updated successfully` ,sharedbyMe: all_permissions });
     }
     // create new permission
     console.log("create new permission");
@@ -67,11 +68,13 @@ const createNewPermission = asyncHandler(async (req, res) => {
     }
     contentObject.is_shared = true;
     const update_content = await contentObject.save();
-
+    
+    const all_permissions = await PermissionBy.find({ owner_email:email }).exec();
+    console.log(all_permissions);
     if (!update_content) {
         return res.status(500).json({ message: "Problem updating content" });
     }
-    return res.status(201).json({ message: `permission created successfully`,sharedbyMe: create });
+    return res.status(201).json({ message: `permission created successfully`,sharedbyMe: all_permissions });
 
 });
 
@@ -162,15 +165,25 @@ const deletePermissionByContentId = asyncHandler(async (req, res) => {
     if (!permission_object) {
         return res.status(404).json({ message: "permission not found" });
     }
+    const owner = permission_object.owner_email;
     const permission_to_object = await PermissionTo.deleteMany({ permission_by_id: permission_object._id, permission_to_email: emailId }).exec();
     if (!permission_to_object) {
         return res.status(500).json({ message: "Problem deleting permission" });
     }
-    const delete_permission = await PermissionBy.deleteOne({ contentId: contentId }).exec();
+    permission_object.user_emails = permission_object.user_emails.filter(e => e !== emailId);
+    const update_permission = await permission_object.save();
+    if (!update_permission) {
+        return res.status(500).json({ message: "Problem updating permission" });
+    }
+    const all_permissions = await PermissionBy.find({ owner_email: owner }).exec();
+    if (!all_permissions) {
+        return res.status(500).json({ message: "Problem fetching all permissions" });
+    }
+   /*  const delete_permission = await PermissionBy.deleteOne({ contentId: contentId }).exec();
     if (!delete_permission) {
         return res.status(500).json({ message: "Problem deleting permission" });
-    }
-    return res.status(201).json({ message: `permission deleted successfully` });
+    } */
+    return res.status(201).json({ message: `permission deleted successfully`,sharedbyMe: all_permissions});
 });
 module.exports = {
     createNewPermission,

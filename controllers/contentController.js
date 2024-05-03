@@ -72,11 +72,15 @@ const createNewContent = asyncHandler(async (req, res) => {
 
 const createNewContentPublic = asyncHandler(async (req, res) => {
     console.log("createNewContent public called");
-    const { content, subdomain, title, is_shared } = req.body;
+    const { content, is_protected,is_shared,subdomain, title} = req.body;
     const userId = req.params.userId;
 
     if (!userId) {
         return res.status(400).json({ message: "userId is required in params" });
+    }
+
+    if (!content || !title || !subdomain || typeof is_protected !== "boolean") {
+        return res.status(400).json({ message: "content and is_protected boolean and title is required" });
     }
 
     //checl if user exists
@@ -86,9 +90,6 @@ const createNewContentPublic = asyncHandler(async (req, res) => {
     }
 
     // check data if all correct create "contentObject"
-    if (!content || !title || !is_shared) {
-        return res.status(400).json({ message: "content and is_protected boolean and title is required" });
-    }
     const content_size = sizeof(content);
 
     if (content_size > 28000) {
@@ -128,7 +129,6 @@ const getUserContent = asyncHandler(async (req, res) => {
     }
 
     const sharedByMe = await PermissionBy.find({owner_userId: userId}).lean().exec() || [];
-
     const already_exist = await Content.find({ userId }).lean();
     if (!already_exist || !already_exist.length) {
         return res.status(404).json({ message: "No content found" });
